@@ -1,8 +1,8 @@
 #!/bin/bash
 set -xe
 
-URS_USERNAME=$1
-URS_PASSWORD=$2
+URS_USERNAME=$2
+URS_PASSWORD=$3
 GRANULE_URL=https://datapool.asf.alaska.edu/GRD_HD/SB/S1B_IW_GRDH_1SDV_20190203T010956_20190203T011021_014775_01B8E9_C18A.zip
 GRANULE_NAME=S1B_IW_GRDH_1SDV_20190203T010956_20190203T011021_014775_01B8E9_C18A
 
@@ -27,7 +27,7 @@ rm -R TC.dim TC.data
 gdaladdo -r average VH.tif 2 4 8 16
 gdaladdo -r average VV.tif 2 4 8 16
 
-gdal_translate -co TILED=YES -co COMPRESS=DEFLATE -co COPY_SRC_OVERVIEWS=YES VH.tif /output/VH_final.tif
-gdal_translate -co TILED=YES -co COMPRESS=DEFLATE -co COPY_SRC_OVERVIEWS=YES VV.tif /output/VV_final.tif
+gdal_translate -co TILED=YES -co COMPRESS=DEFLATE -co COPY_SRC_OVERVIEWS=YES VH.tif /output/s1b-iw-grd-vh-20190203t010956-20190203t011021-014775-01b8e9-002-rtc.tif
+gdal_translate -co TILED=YES -co COMPRESS=DEFLATE -co COPY_SRC_OVERVIEWS=YES VV.tif /output/s1b-iw-grd-vv-20190203t010956-20190203t011021-014775-01b8e9-001-rtc.tif
 
 rm -R VV.tif VH.tif
