@@ -13,10 +13,8 @@ RUN sh /usr/local/etc/esa-snap_sentinel_unix_5_0.sh -q -varfile /usr/local/etc/s
 COPY gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
 RUN rm /usr/local/etc/esa-snap_sentinel_unix_5_0.sh
 
-RUN mkdir /data
+RUN mkdir /output
 
 COPY rtc.sh /usr/local/sbin/
-
-WORKDIR /data
 
 ENTRYPOINT ["/usr/local/sbin/rtc.sh"]
