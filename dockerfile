@@ -7,11 +7,11 @@ RUN apt-get update && \
 RUN apt-get update && \
     apt-get install -y gdal-bin wget
 
-RUN wget --no-verbose --directory-prefix=/usr/local/etc/ http://step.esa.int/downloads/5.0/installers/esa-snap_sentinel_unix_5_0.sh
+RUN wget --no-verbose --directory-prefix=/usr/local/etc/ http://step.esa.int/downloads/6.0/installers/esa-snap_sentinel_unix_6_0.sh
 COPY snap_install.varfile /usr/local/etc/snap_install.varfile
-RUN sh /usr/local/etc/esa-snap_sentinel_unix_5_0.sh -q -varfile /usr/local/etc/snap_install.varfile
+RUN sh /usr/local/etc/esa-snap_sentinel_unix_6_0.sh -q -varfile /usr/local/etc/snap_install.varfile
 COPY gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
-RUN rm /usr/local/etc/esa-snap_sentinel_unix_5_0.sh
+RUN rm /usr/local/etc/esa-snap_sentinel_unix_6_0.sh
 
 RUN mkdir /output
 
