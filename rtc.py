@@ -52,7 +52,7 @@ shutil.rmtree("Orb.data")
 
 subprocess.run(["/usr/local/snap/bin/gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Cal.dim", "-t", "TF"])
 os.unlink("Cal.dim")
-shutil.rmtree("Cal.dim")
+shutil.rmtree("Cal.data")
 
 subprocess.run(["/usr/local/snap/bin/gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
 os.unlink("TF.dim")
