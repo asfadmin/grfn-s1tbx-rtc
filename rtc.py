@@ -45,11 +45,10 @@ args = get_args()
 params = dict(
     readable_granule_name=args.granule,
     provider='ASF',
-    collection_concept_id=["C1214470533-ASF","C1214471521-ASF","C1214470488-ASF","C1214470682-ASF","C1214472994-ASF","C1327985645-ASF","C1327985660-ASF","C1327985661-ASF","C1327985571-ASF"]
+    collection_concept_id=COLLECTION_IDS
 )
 
-cmr_url = "https://cmr.earthdata.nasa.gov/search/granules.json"
-response = requests.get(url=cmr_url, params=params)
+response = requests.get(url=CMR_URL, params=params)
 cmr_data = response.json()
 download_url = ""
 for product in cmr_data['feed']['entry'][0]['links']:
