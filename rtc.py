@@ -20,13 +20,17 @@ def download_file(url):
                     f.write(chunk)
     return local_filename
 
-parser = argparse.ArgumentParser(description='Validate username and password.')
-parser.add_argument("--username", type=str, help="URS Username", required=1)
-parser.add_argument("--password", type=str, help="URS Password", required=1)
-parser.add_argument("--granule", type=str, help="Granule Name", required=1)
-args = parser.parse_args()
+
+def get_args():
+    parser = argparse.ArgumentParser(description='Validate username and password.')
+    parser.add_argument("--username", type=str, help="URS Username", required=1)
+    parser.add_argument("--password", type=str, help="URS Password", required=1)
+    parser.add_argument("--granule", type=str, help="Granule Name", required=1)
+    args = parser.parse_args()
+    return args
 
 
+args = get_args()
 params = dict(
     readable_granule_name=args.granule,
     provider='ASF',
