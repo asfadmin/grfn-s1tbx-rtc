@@ -41,9 +41,9 @@ f = open(os.environ['HOME'] + "/.netrc", "w")
 f.write("machine urs.earthdata.nasa.gov login " + args.username + " password " + args.password)
 f.close()
 
-download_file(download_url)
+local_file = download_file(download_url)
 
-subprocess.run(["/usr/local/snap/bin/gpt", "Apply-Orbit-File", "-Ssource=" + args.granule, "-t",  "Orb"])
+subprocess.run(["/usr/local/snap/bin/gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
 os.unlink("Orb.dim")
 shutil.rmtree("Orb.data")
 subprocess.run(["/usr/local/snap/bin/gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource=Orb.dim", "-t", "Cal"])
