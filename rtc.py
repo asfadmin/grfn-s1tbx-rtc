@@ -35,6 +35,12 @@ def write_netrc_file(username, password):
     with open(netrc_file, "w") as f:
         f.write("machine urs.earthdata.nasa.gov login " + username + " password " + password)
 
+
+def delete_dim_files(name):
+    os.unlink(name + ".dim")
+    shutil.rmtree(name + ".data")
+
+
 args = get_args()
 params = dict(
     readable_granule_name=args.granule,
@@ -58,21 +64,17 @@ subprocess.run(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb
 os.unlink(local_file)
 
 subprocess.run(["gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource=Orb.dim", "-t", "Cal"])
-os.unlink("Orb.dim")
-shutil.rmtree("Orb.data")
+delete_dim_files("Orb")
 
 subprocess.run(["gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Cal.dim", "-t", "TF"])
-os.unlink("Cal.dim")
-shutil.rmtree("Cal.data")
+delete_dim_files("Cal")
 
 subprocess.run(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
-os.unlink("TF.dim")
-shutil.rmtree("TF.data")
+delete_dim_files("TF")
 
 subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/Gamma0_VH.img", "VH.tif"])
 subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/Gamma0_VV.img", "VV.tif"])
-os.unlink("TC.dim")
-shutil.rmtree("TC.data")
+delete_dim_files("TC")
 
 subprocess.run(["gdaladdo", "-r", "average", "VH.tif", "2", "4", "8", "16"])
 subprocess.run(["gdaladdo", "-r", "average", "VV.tif", "2", "4", "8", "16"])
