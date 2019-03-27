@@ -30,6 +30,11 @@ def get_args():
     return args
 
 
+def write_netrc_file(username, password):
+    netrc_file = os.environ['HOME'] + "/.netrc"
+    with open(netrc_file, "w") as f:
+        f.write("machine urs.earthdata.nasa.gov login " + username + " password " + password)
+
 args = get_args()
 params = dict(
     readable_granule_name=args.granule,
@@ -45,9 +50,7 @@ for product in cmr_data['feed']['entry'][0]['links']:
 	if 'data' in product['rel']:
 		download_url = product['href']
 
-f = open(os.environ['HOME'] + "/.netrc", "w")
-f.write("machine urs.earthdata.nasa.gov login " + args.username + " password " + args.password)
-f.close()
+write_netrc_file(args.username, args.password)
 
 local_file = download_file(download_url)
 
