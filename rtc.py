@@ -67,6 +67,6 @@ subprocess.run(["gdaladdo", "-r", "average", "VH.tif", "2", "4", "8", "16"])
 subprocess.run(["gdaladdo", "-r", "average", "VV.tif", "2", "4", "8", "16"])
 
 subprocess.run(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", "VH.tif", "/output/" + args.granule + "_vh.tif"])
-subprocess.run(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", "VV.tif", "/output/" + args.granule + "_vh.tif"])
+subprocess.run(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", "VV.tif", "/output/" + args.granule + "_vv.tif"])
 os.unlink("VV.tif")
 os.unlink("VH.tif")
