@@ -4,7 +4,7 @@ import os
 import argparse
 import requests
 import subprocess
-
+import shutil
 
 def download_file(url):
     local_filename = url.split('/')[-1]
