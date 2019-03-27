@@ -41,44 +41,45 @@ def delete_dim_files(name):
     shutil.rmtree(name + ".data")
 
 
-args = get_args()
-params = dict(
-    readable_granule_name=args.granule,
-    provider='ASF',
-    collection_concept_id=COLLECTION_IDS
-)
+if __name__ == "__main__":
+    args = get_args()
+    params = dict(
+        readable_granule_name=args.granule,
+        provider='ASF',
+        collection_concept_id=COLLECTION_IDS
+    )
 
-response = requests.get(url=CMR_URL, params=params)
-cmr_data = response.json()
-download_url = ""
-for product in cmr_data['feed']['entry'][0]['links']:
-	if 'data' in product['rel']:
-		download_url = product['href']
+    response = requests.get(url=CMR_URL, params=params)
+    cmr_data = response.json()
+    download_url = ""
+    for product in cmr_data['feed']['entry'][0]['links']:
+        if 'data' in product['rel']:
+            download_url = product['href']
 
-write_netrc_file(args.username, args.password)
+    write_netrc_file(args.username, args.password)
 
-local_file = download_file(download_url)
+    local_file = download_file(download_url)
 
-subprocess.run(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
-os.unlink(local_file)
+    subprocess.run(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
+    os.unlink(local_file)
 
-subprocess.run(["gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource=Orb.dim", "-t", "Cal"])
-delete_dim_files("Orb")
+    subprocess.run(["gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource=Orb.dim", "-t", "Cal"])
+    delete_dim_files("Orb")
 
-subprocess.run(["gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Cal.dim", "-t", "TF"])
-delete_dim_files("Cal")
+    subprocess.run(["gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Cal.dim", "-t", "TF"])
+    delete_dim_files("Cal")
 
-subprocess.run(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
-delete_dim_files("TF")
+    subprocess.run(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
+    delete_dim_files("TF")
 
-subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/Gamma0_VH.img", "VH.tif"])
-subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/Gamma0_VV.img", "VV.tif"])
-delete_dim_files("TC")
+    subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/Gamma0_VH.img", "VH.tif"])
+    subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/Gamma0_VV.img", "VV.tif"])
+    delete_dim_files("TC")
 
-subprocess.run(["gdaladdo", "-r", "average", "VH.tif", "2", "4", "8", "16"])
-subprocess.run(["gdaladdo", "-r", "average", "VV.tif", "2", "4", "8", "16"])
+    subprocess.run(["gdaladdo", "-r", "average", "VH.tif", "2", "4", "8", "16"])
+    subprocess.run(["gdaladdo", "-r", "average", "VV.tif", "2", "4", "8", "16"])
 
-subprocess.run(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", "VH.tif", "/output/" + args.granule + "_vh.tif"])
-subprocess.run(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", "VV.tif", "/output/" + args.granule + "_vv.tif"])
-os.unlink("VV.tif")
-os.unlink("VH.tif")
+    subprocess.run(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", "VH.tif", "/output/" + args.granule + "_vh.tif"])
+    subprocess.run(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", "VV.tif", "/output/" + args.granule + "_vv.tif"])
+    os.unlink("VV.tif")
+    os.unlink("VH.tif")
