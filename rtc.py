@@ -51,12 +51,12 @@ os.unlink("Orb.dim")
 shutil.rmtree("Orb.data")
 
 subprocess.run(["/usr/local/snap/bin/gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Cal.dim", "-t", "TF"])
-os.unlink("TF.dim")
 os.unlink("Cal.dim")
+shutil.rmtree("Cal.dim")
 
 subprocess.run(["/usr/local/snap/bin/gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
-os.unlink("TC.dim")
-shutil.rmtree("Cal.data")
+os.unlink("TF.dim")
+shutil.rmtree("TF.data")
 
 subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/Gamma0_VH.img", "VH.tif"])
 subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/Gamma0_VV.img", "VV.tif"])
