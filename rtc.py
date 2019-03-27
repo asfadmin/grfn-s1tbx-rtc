@@ -6,6 +6,10 @@ import requests
 import subprocess
 import shutil
 
+CMR_URL = "https://cmr.earthdata.nasa.gov/search/granules.json"
+COLLECTION_IDS = ["C1214470533-ASF","C1214471521-ASF","C1214470488-ASF","C1214470682-ASF","C1214472994-ASF","C1327985645-ASF","C1327985660-ASF","C1327985661-ASF","C1327985571-ASF"]
+
+
 def download_file(url):
     local_filename = url.split('/')[-1]
     with requests.get(url, stream=True) as r:
@@ -43,18 +47,18 @@ f.close()
 
 local_file = download_file(download_url)
 
-subprocess.run(["/usr/local/snap/bin/gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
+subprocess.run(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
 os.unlink(local_file)
 
-subprocess.run(["/usr/local/snap/bin/gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource=Orb.dim", "-t", "Cal"])
+subprocess.run(["gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource=Orb.dim", "-t", "Cal"])
 os.unlink("Orb.dim")
 shutil.rmtree("Orb.data")
 
-subprocess.run(["/usr/local/snap/bin/gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Cal.dim", "-t", "TF"])
+subprocess.run(["gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Cal.dim", "-t", "TF"])
 os.unlink("Cal.dim")
 shutil.rmtree("Cal.data")
 
-subprocess.run(["/usr/local/snap/bin/gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
+subprocess.run(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
 os.unlink("TF.dim")
 shutil.rmtree("TF.data")
 
