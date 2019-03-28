@@ -19,11 +19,13 @@ COLLECTION_IDS = [
     "C1327985571-ASF", # SENTINEL-1B_SINGLE_POL_GRD_HIGH_RES
     "C1327985740-ASF", # SENTINEL-1B_SINGLE_POL_GRD_MEDIUM_RES
 ]
+USER_AGENT = "asfdaac/s1tbx-rtc"
 
 
 def download_file(url):
     local_filename = url.split("/")[-1]
-    with requests.get(url, stream=True) as r:
+    headers = {'User-Agent': USER_AGENT}
+    with requests.get(url, headers=headers, stream=True) as r:
         r.raise_for_status()
         with open(local_filename, "wb") as f:
             for chunk in r.iter_content(chunk_size=8192): 
