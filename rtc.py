@@ -77,10 +77,11 @@ if __name__ == "__main__":
 
     for file_name in os.listdir('TC.data'):
         if file_name.endswith('.img'):
-            print(file_name)
             polarization = file_name[-6:-4]
+            output_file_name = args.granule + "_" + polarization + "_RTC.tif"
+            print("Creating " + output_file_name)
             subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/" + file_name, "temp.tif"])
             subprocess.run(["gdaladdo", "-r", "average", "temp.tif", "2", "4", "8", "16"])
-            subprocess.run(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", "temp.tif", "/output/" + args.granule + "_" + polarization + "_RTC.tif"])
+            subprocess.run(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", "temp.tif", "/output/" + output_file_name])
             os.unlink("temp.tif")
     delete_dim_files("TC")
