@@ -49,7 +49,7 @@ if __name__ == "__main__":
         collection_concept_id=COLLECTION_IDS
     )   
 
-    print("Fetching Download URL from CMR")
+    print("\nFinding Product Information")
     response = requests.get(url=CMR_URL, params=params)
     cmr_data = response.json()
     download_url = ""
@@ -58,26 +58,26 @@ if __name__ == "__main__":
             download_url = product['href']
     
     write_netrc_file(args.username, args.password)
-    print("Downling file: " + downlaod_url)
+    print("\nDownloading file: " + download_url)
     local_file = download_file(download_url)
     
-    print("Running Apply Orbit File on " + local_file)
+    print("\nRunning Apply Orbit File on " + local_file)
     subprocess.run(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
     os.unlink(local_file)
 
-    print("Running Calibration")
+    print("\nRunning Calibration")
     subprocess.run(["gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource=Orb.dim", "-t", "Cal"])
     delete_dim_files("Orb")
 
-    print("Running Terrain Flattening")
+    print("\nRunning Terrain Flattening")
     subprocess.run(["gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Cal.dim", "-t", "TF"])
     delete_dim_files("Cal")
 
-    print("Running Terrain Correction")
+    print("\nRunning Terrain Correction")
     subprocess.run(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
     delete_dim_files("TF")
 
-    print("Creating GeoTIFFs")
+    print("\nCreating GeoTIFFs")
     subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/Gamma0_VH.img", "VH.tif"])
     subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/Gamma0_VV.img", "VV.tif"])
     delete_dim_files("TC")
