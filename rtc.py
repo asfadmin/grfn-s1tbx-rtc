@@ -70,6 +70,14 @@ def delete_dim_files(name):
     os.unlink(name + ".dim")
     shutil.rmtree(name + ".data")
 
+def system_call(args):
+    try:
+        output = subprocess.check_output(args)
+    except subprocess.CalledProcessError as e:
+        print("ERROR: " + e.returncode + ", output:\n" + e.output)
+        exit(1)
+    return None
+
 
 if __name__ == "__main__":
     args = get_args()
@@ -86,35 +94,21 @@ if __name__ == "__main__":
     local_file = download_file(download_url)
 
     print("\nApplying Orbit File")
-    try:
-        output = subprocess.check_output(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
-    except subprocess.CalledProcessError as e:
-        print("ERROR: Applying Orbit File Failed: " + e.returncode + ", output:\n" + e.output)
-        exit(1)
+    system_call(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
+
     os.unlink(local_file)
 
     print("\nRunning Calibration")
-    try:
-        output = subprocess.check_output(["gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource=Orb.dim", "-t", "Cal"])
-    except subprocess.CalledProcessError as e:
-        print("ERROR: Running Calibration failed: " + e.returncode + ", output:\n" + e.output)
-        exit(1)
+    system_call(["gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource=Orb.dim", "-t", "Cal"])
     delete_dim_files("Orb")
 
     print("\nRunning Terrain Flattening")
-    try:
-        output = subprocess.check_output(["gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Cal.dim", "-t", "TF"])
-    except subprocess.CalledProcessError as e:
-        print("ERROR: Running Terrain Falttening Failed: " + e.returncode + ", output:\n" + e.output)
-        exit(1)
+    system_call(["gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Cal.dim", "-t", "TF"])
     delete_dim_files("Cal")
 
     print("\nRunning Terrain Correction")
-    try:
-        output = subprocess.check_output(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
-    except subprocess.CalledProcessError as e:
-        print("ERROR: Running Terrain Correction failed: " + e.returncode + ", output:\n" + e.output)
-        exit(1)
+    system_call(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
+
     delete_dim_files("TF")
 
     for file_name in os.listdir("TC.data"):
@@ -123,20 +117,8 @@ if __name__ == "__main__":
             temp_file_name = "temp.tif"
             output_file_name = args.granule + "_" + polarization + "_RTC.tif"
             print("\nCreating " + output_file_name)
-            try:
-                output = subprocess.check_output(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/" + file_name, temp_file_name])
-            except subprocess.CalledProcessError as e:
-                print("ERROR: Geotiff creation failed: " + e.returncode + ", output:\n" + e.output)
-                exit(1)
-            try:
-                output = subprocess.check_output(["gdaladdo", "-r", "average", temp_file_name, "2", "4", "8", "16"])
-            except subprocess.CalledProcessError as e:
-                print("ERROR: Geotiff creation failed: " + e.returncode + ", output:\n" + e.output)
-                exit(1)
-            try:
-                output = subprocess.check_output(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file_name, "/output/" + output_file_name])
-            except subprocess.CalledProcessError as e:
-                print("ERROR: Geotiff creation failed: " + e.returncode + ", output:\n" + e.output)
-                exit(1)
+            system_call(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/" + file_name, temp_file_name])
+            system_call(["gdaladdo", "-r", "average", temp_file_name, "2", "4", "8", "16"])
+            system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file_name, "/output/" + output_file_name])
             os.unlink(temp_file_name)
     delete_dim_files("TC")
