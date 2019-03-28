@@ -21,6 +21,22 @@ def download_file(url):
     return local_filename
 
 
+def get_download_url(granule):
+    params = {
+        "readable_granule_name": granule,
+        "provider": "ASF",
+        "collection_concept_id": COLLECTION_IDS
+    }
+    response = requests.get(url=CMR_URL, params=params)
+    response.raise_for_status()
+    cmr_data = response.json()
+    download_url = ""
+    for product in cmr_data['feed']['entry'][0]['links']:
+        if 'data' in product['rel']:
+            download_url = product['href']
+    return download_url
+
+
 def get_args():
     parser = argparse.ArgumentParser(description='Validate username and password.')
     parser.add_argument("--username", type=str, help="URS Username", required=1)
@@ -43,21 +59,8 @@ def delete_dim_files(name):
 
 if __name__ == "__main__":
     args = get_args()
-    params = dict(
-        readable_granule_name=args.granule,
-        provider='ASF',
-        collection_concept_id=COLLECTION_IDS
-    )
-
-    response = requests.get(url=CMR_URL, params=params)
-    cmr_data = response.json()
-    download_url = ""
-    for product in cmr_data['feed']['entry'][0]['links']:
-        if 'data' in product['rel']:
-            download_url = product['href']
-
     write_netrc_file(args.username, args.password)
-
+    download_url = get_download_url(args.granule)
     local_file = download_file(download_url)
 
     subprocess.run(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
