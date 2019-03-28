@@ -17,4 +17,4 @@ COPY gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
 COPY rtc.py /usr/local/sbin/
 ENV PATH=$PATH:/usr/local/snap/bin
 
-ENTRYPOINT ["python3", "/usr/local/sbin/rtc.py"]
+ENTRYPOINT ["python3", "-u", "/usr/local/sbin/rtc.py"]
