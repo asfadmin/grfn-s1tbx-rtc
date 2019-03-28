@@ -75,14 +75,12 @@ if __name__ == "__main__":
     subprocess.run(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
     delete_dim_files("TF")
 
-    subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/Gamma0_VH.img", "VH.tif"])
-    subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/Gamma0_VV.img", "VV.tif"])
+    for file_name in os.listdir('TC.data'):
+        if file_name.endswith('.img'):
+            print(file_name)
+            polarization = file_name[-6:-4]
+            subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/" + file_name, "temp.tif"])
+            subprocess.run(["gdaladdo", "-r", "average", "temp.tif", "2", "4", "8", "16"])
+            subprocess.run(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", "temp.tif", "/output/" + args.granule + "_" + polarization + "_RTC.tif"])
+            os.unlink("temp.tif")
     delete_dim_files("TC")
-
-    subprocess.run(["gdaladdo", "-r", "average", "VH.tif", "2", "4", "8", "16"])
-    subprocess.run(["gdaladdo", "-r", "average", "VV.tif", "2", "4", "8", "16"])
-
-    subprocess.run(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", "VH.tif", "/output/" + args.granule + "_vh.tif"])
-    subprocess.run(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", "VV.tif", "/output/" + args.granule + "_vv.tif"])
-    os.unlink("VV.tif")
-    os.unlink("VH.tif")
