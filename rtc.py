@@ -45,11 +45,11 @@ def get_download_url(granule):
     response.raise_for_status()
     cmr_data = response.json()
     download_url = ""
-    for product in cmr_data["feed"]["entry"][0]["links"]:
-        if "data" in product["rel"]:
-            download_url = product["href"]
-    return download_url
-
+    if cmr_data["feed"]["entry"]:
+        for product in cmr_data["feed"]["entry"][0]["links"]:
+            if "data" in product["rel"]:
+                return product["href"]
+    return None
 
 def get_args():
     parser = argparse.ArgumentParser(description="Radiometric Terrain Correction using the SENTINEL-1 Toolbox")
@@ -76,7 +76,11 @@ if __name__ == "__main__":
 
     print("\nFetching Granule Information")
     download_url = get_download_url(args.granule)
+    if download_url is None:
+        print("\nERROR: Either " + args.granule + " does exist or it is not a GRDM,GRDH or SLC.")
+        exit(1)
 
+    
     print("\nDownloading Granule from " + download_url)
     write_netrc_file(args.username, args.password)
     local_file = download_file(download_url)
