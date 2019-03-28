@@ -76,7 +76,11 @@ if __name__ == "__main__":
 
     print("\nFetching Granule Information")
     download_url = get_download_url(args.granule)
+    if download_url is "":
+        print("ERROR: Granule " + args.granule + " not found.")
+        exit(1)
 
+    
     print("\nDownloading Granule from " + download_url)
     write_netrc_file(args.username, args.password)
     local_file = download_file(download_url)
