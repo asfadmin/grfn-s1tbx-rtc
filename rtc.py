@@ -22,7 +22,7 @@ COLLECTION_IDS = [
 ]
 
 
-def download_file(url,CHUNK_SIZE):
+def download_file(url):
     local_filename = url.split("/")[-1]
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
     print("\nDownloading Granule from " + download_url)
     write_netrc_file(args.username, args.password)
-    local_file = download_file(download_url,CHUNK_SIZE)
+    local_file = download_file(download_url)
     
     print("\nApplying Orbit File")
     subprocess.run(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
