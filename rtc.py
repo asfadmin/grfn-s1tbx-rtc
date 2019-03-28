@@ -29,8 +29,8 @@ def download_file(url):
     with requests.get(url, headers=headers, stream=True) as r:
         r.raise_for_status()
         with open(local_filename, "wb") as f:
-            for chunk in r.iter_content(chunk_size=CHUNK_SIZE): 
-                if chunk: 
+            for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
+                if chunk:
                     f.write(chunk)
     return local_filename
 
@@ -71,6 +71,13 @@ def delete_dim_files(name):
     shutil.rmtree(name + ".data")
 
 
+def system_call(params):
+    return_code = subprocess.call(params)
+    if return_code:
+        exit(return_code)
+    return None
+
+
 if __name__ == "__main__":
     args = get_args()
 
@@ -80,25 +87,27 @@ if __name__ == "__main__":
         print("\nERROR: Either " + args.granule + " does exist or it is not a GRDM,GRDH or SLC.")
         exit(1)
 
-    
+
     print("\nDownloading Granule from " + download_url)
     write_netrc_file(args.username, args.password)
     local_file = download_file(download_url)
-    
+
     print("\nApplying Orbit File")
-    subprocess.run(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
+    system_call(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
+
     os.unlink(local_file)
 
     print("\nRunning Calibration")
-    subprocess.run(["gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource=Orb.dim", "-t", "Cal"])
+    system_call(["gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource=Orb.dim", "-t", "Cal"])
     delete_dim_files("Orb")
 
     print("\nRunning Terrain Flattening")
-    subprocess.run(["gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Cal.dim", "-t", "TF"])
+    system_call(["gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Cal.dim", "-t", "TF"])
     delete_dim_files("Cal")
 
     print("\nRunning Terrain Correction")
-    subprocess.run(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
+    system_call(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
+
     delete_dim_files("TF")
 
     for file_name in os.listdir("TC.data"):
@@ -107,8 +116,8 @@ if __name__ == "__main__":
             temp_file_name = "temp.tif"
             output_file_name = args.granule + "_" + polarization + "_RTC.tif"
             print("\nCreating " + output_file_name)
-            subprocess.run(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/" + file_name, temp_file_name])
-            subprocess.run(["gdaladdo", "-r", "average", temp_file_name, "2", "4", "8", "16"])
-            subprocess.run(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file_name, "/output/" + output_file_name])
+            system_call(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/" + file_name, temp_file_name])
+            system_call(["gdaladdo", "-r", "average", temp_file_name, "2", "4", "8", "16"])
+            system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file_name, "/output/" + output_file_name])
             os.unlink(temp_file_name)
     delete_dim_files("TC")
