@@ -70,12 +70,11 @@ def delete_dim_files(name):
     os.unlink(name + ".dim")
     shutil.rmtree(name + ".data")
 
+
 def system_call(params):
-    try:
-        output = subprocess.check_output(params)
-    except subprocess.CalledProcessError as e:
-        print("ERROR: " + e.returncode + ", output:\n" + e.output)
-        exit(1)
+    return_code = subprocess.call(params)
+    if return_code:
+        exit(return_code)
     return None
 
 
