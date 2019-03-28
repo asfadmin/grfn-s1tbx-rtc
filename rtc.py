@@ -73,11 +73,11 @@ if __name__ == "__main__":
     args = get_args()
 
     print("\nFetching Granule Information")
-    download_url = get_download_url(args.granule,CHUNK_SIZE)
+    download_url = get_download_url(args.granule)
 
     print("\nDownloading Granule from " + download_url)
     write_netrc_file(args.username, args.password)
-    local_file = download_file(download_url)
+    local_file = download_file(download_url,CHUNK_SIZE)
     
     print("\nApplying Orbit File")
     subprocess.run(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
