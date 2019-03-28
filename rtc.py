@@ -22,10 +22,10 @@ COLLECTION_IDS = [
 
 
 def download_file(url):
-    local_filename = url.split('/')[-1]
+    local_filename = url.split("/")[-1]
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
-        with open(local_filename, 'wb') as f:
+        with open(local_filename, "wb") as f:
             for chunk in r.iter_content(chunk_size=8192): 
                 if chunk: 
                     f.write(chunk)
@@ -42,9 +42,9 @@ def get_download_url(granule):
     response.raise_for_status()
     cmr_data = response.json()
     download_url = ""
-    for product in cmr_data['feed']['entry'][0]['links']:
-        if 'data' in product['rel']:
-            download_url = product['href']
+    for product in cmr_data["feed"]["entry"][0]["links"]:
+        if "data" in product["rel"]:
+            download_url = product["href"]
     return download_url
 
 
@@ -58,7 +58,7 @@ def get_args():
 
 
 def write_netrc_file(username, password):
-    netrc_file = os.environ['HOME'] + "/.netrc"
+    netrc_file = os.environ["HOME"] + "/.netrc"
     with open(netrc_file, "w") as f:
         f.write("machine urs.earthdata.nasa.gov login " + username + " password " + password)
 
@@ -94,8 +94,8 @@ if __name__ == "__main__":
     subprocess.run(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
     delete_dim_files("TF")
 
-    for file_name in os.listdir('TC.data'):
-        if file_name.endswith('.img'):
+    for file_name in os.listdir("TC.data"):
+        if file_name.endswith(".img"):
             polarization = file_name[-6:-4]
             temp_file_name = "temp.tif"
             output_file_name = args.granule + "_" + polarization + "_RTC.tif"
