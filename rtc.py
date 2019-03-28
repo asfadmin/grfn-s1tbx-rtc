@@ -45,11 +45,12 @@ def get_download_url(granule):
     response.raise_for_status()
     cmr_data = response.json()
     download_url = ""
+    if not cmr_data["feed"]["entry"]:
+        return ""
     for product in cmr_data["feed"]["entry"][0]["links"]:
         if "data" in product["rel"]:
-            download_url = product["href"]
-    return download_url
-
+            return download_url = product["href"]
+    return ""
 
 def get_args():
     parser = argparse.ArgumentParser(description="Radiometric Terrain Correction using the SENTINEL-1 Toolbox")
