@@ -6,6 +6,7 @@ import requests
 import subprocess
 import shutil
 
+CHUNK_SIZE=5242880
 CMR_URL = "https://cmr.earthdata.nasa.gov/search/granules.json"
 COLLECTION_IDS = [
     "C1214470533-ASF", # SENTINEL-1A_DUAL_POL_GRD_HIGH_RES
@@ -21,12 +22,12 @@ COLLECTION_IDS = [
 ]
 
 
-def download_file(url):
+def download_file(url,CHUNK_SIZE):
     local_filename = url.split("/")[-1]
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
         with open(local_filename, "wb") as f:
-            for chunk in r.iter_content(chunk_size=8192): 
+            for chunk in r.iter_content(chunk_size=CHUNK_SIZE): 
                 if chunk: 
                     f.write(chunk)
     return local_filename
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     args = get_args()
 
     print("\nFetching Granule Information")
-    download_url = get_download_url(args.granule)
+    download_url = get_download_url(args.granule,CHUNK_SIZE)
 
     print("\nDownloading Granule from " + download_url)
     write_netrc_file(args.username, args.password)
