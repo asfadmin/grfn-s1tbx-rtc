@@ -11,12 +11,10 @@ CMR_URL = "https://cmr.earthdata.nasa.gov/search/granules.json"
 COLLECTION_IDS = [
     "C1214470533-ASF", # SENTINEL-1A_DUAL_POL_GRD_HIGH_RES
     "C1214471521-ASF", # SENTINEL-1A_DUAL_POL_GRD_MEDIUM_RES
-    "C1214470488-ASF", # SENTINEL-1A_SLC
     "C1214470682-ASF", # SENTINEL-1A_SINGLE_POL_GRD_HIGH_RES
     "C1214472994-ASF", # SENTINEL-1A_SINGLE_POL_GRD_MEDIUM_RES
     "C1327985645-ASF", # SENTINEL-1B_DUAL_POL_GRD_HIGH_RES
     "C1327985660-ASF", # SENTINEL-1B_DUAL_POL_GRD_MEDIUM_RES
-    "C1327985661-ASF", # SENTINEL-1B_SLC
     "C1327985571-ASF", # SENTINEL-1B_SINGLE_POL_GRD_HIGH_RES
     "C1327985740-ASF", # SENTINEL-1B_SINGLE_POL_GRD_MEDIUM_RES
 ]
@@ -84,9 +82,8 @@ if __name__ == "__main__":
     print("\nFetching Granule Information")
     download_url = get_download_url(args.granule)
     if download_url is None:
-        print("\nERROR: Either " + args.granule + " does exist or it is not a GRDM,GRDH or SLC.")
+        print("\nERROR: Either " + args.granule + " does exist or it is not a GRD product.")
         exit(1)
-
 
     print("\nDownloading Granule from " + download_url)
     write_netrc_file(args.username, args.password)
