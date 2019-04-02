@@ -91,16 +91,19 @@ if __name__ == "__main__":
 
     print("\nApplying Orbit File")
     system_call(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
-
     os.unlink(local_file)
 
     print("\nRunning Calibration")
     system_call(["gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource=Orb.dim", "-t", "Cal"])
     delete_dim_files("Orb")
 
-    print("\nRunning Terrain Flattening")
-    system_call(["gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Cal.dim", "-t", "TF"])
+    print("\nRunning Speckle Filter")
+    system_call(["gpt", "Speckle-Filter", "-Ssource=Cal.dim", "-t", "Spk"])
     delete_dim_files("Cal")
+
+    print("\nRunning Terrain Flattening")
+    system_call(["gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Spk.dim", "-t", "TF"])
+    delete_dim_files("Spk")
 
     print("\nRunning Terrain Correction")
     system_call(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PmapProjection=EPSG:32613", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
