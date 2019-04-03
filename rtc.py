@@ -76,6 +76,46 @@ def system_call(params):
     return None
 
 
+def apply_orbit_file(input_file):
+    print("\nApply Orbit File")
+    output_file = "Orb"
+    system_call(["gpt", "Apply-Orbit-File", "-Ssource=" + input_file, "-t",  output_file])
+    os.unlink(input_file)
+    return output_file
+
+
+def calibration(input_file):
+    print("\nCalibration")
+    output_file = "Cal"
+    system_call(["gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource={0}.dim".format(input_file), "-t", output_file])
+    delete_dim_files(input_file)
+    return output_file
+
+
+def speckle_filter(input_file):
+    print("\nSpeckle Filter")
+    output_file = "Spk"
+    system_call(["gpt", "Speckle-Filter", "-Ssource={0}.dim".format(input_file), "-t", output_file])
+    delete_dim_files(input_file)
+    return output_file
+
+
+def terrain_flattening(input_file):
+    print("\nTerrain Flattening")
+    output_file = "TF"
+    system_call(["gpt", "Terrain-Flattening", "-PreGridMethod=False", "-Ssource={0}.dim".format(input_file), "-t", output_file])
+    delete_dim_files(input_file)
+    return output_file
+
+
+def terrain_correction(input_file):
+    print("\nTerrain Correction")
+    output_file = "TC"
+    system_call(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT", "-Ssource={0}.dim".format(input_file), "-t", output_file])
+    delete_dim_files(input_file)
+    return output_file
+
+
 if __name__ == "__main__":
     args = get_args()
 
@@ -85,32 +125,17 @@ if __name__ == "__main__":
         print("\nERROR: Either " + args.granule + " does exist or it is not a GRD product.")
         exit(1)
 
-    print("\nDownloading Granule from " + download_url)
+    print("\nDownloading granule from " + download_url)
     write_netrc_file(args.username, args.password)
     local_file = download_file(download_url)
 
-    print("\nApplying Orbit File")
-    system_call(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
-    os.unlink(local_file)
+    local_file = apply_orbit_file(local_file)
+    local_file = calibration(local_file)
+    local_file = speckle_filter(local_file)
+    local_file = terrain_flattening(local_file)
+    local_file = terrain_correction(local_file)
 
-    print("\nRunning Calibration")
-    system_call(["gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource=Orb.dim", "-t", "Cal"])
-    delete_dim_files("Orb")
-
-    print("\nRunning Speckle Filter")
-    system_call(["gpt", "Speckle-Filter", "-Ssource=Cal.dim", "-t", "Spk"])
-    delete_dim_files("Cal")
-
-    print("\nRunning Terrain Flattening")
-    system_call(["gpt", "Terrain-Flattening", "-PreGridMethod=False", "-Ssource=Spk.dim", "-t", "TF"])
-    delete_dim_files("Spk")
-
-    print("\nRunning Terrain Correction")
-    system_call(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
-
-    delete_dim_files("TF")
-
-    for file_name in os.listdir("TC.data"):
+    for file_name in os.listdir(local_file + ".data"):
         if file_name.endswith(".img"):
             polarization = file_name[-6:-4]
             temp_file_name = "temp.tif"
@@ -120,4 +145,4 @@ if __name__ == "__main__":
             system_call(["gdaladdo", "-r", "average", temp_file_name, "2", "4", "8", "16"])
             system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file_name, "/output/" + output_file_name])
             os.unlink(temp_file_name)
-    delete_dim_files("TC")
+    delete_dim_files(local_file)
