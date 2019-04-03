@@ -49,6 +49,7 @@ def get_download_url(granule):
                 return product["href"]
     return None
 
+
 def get_args():
     parser = argparse.ArgumentParser(description="Radiometric Terrain Correction using the SENTINEL-1 Toolbox")
     parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 Granule Name", required=True)
@@ -61,19 +62,39 @@ def get_args():
 def write_netrc_file(username, password):
     netrc_file = os.environ["HOME"] + "/.netrc"
     with open(netrc_file, "w") as f:
-        f.write("machine urs.earthdata.nasa.gov login " + username + " password " + password)
-
-
-def delete_dim_files(name):
-    os.unlink(name + ".dim")
-    shutil.rmtree(name + ".data")
+        f.write(f"machine urs.earthdata.nasa.gov login {username} password {password}")
 
 
 def system_call(params):
+    print(' '.join(params))
     return_code = subprocess.call(params)
     if return_code:
         exit(return_code)
     return None
+
+
+def cleanup(input_file):
+    os.unlink(input_file)
+    if input_file.endswith(".dim"):
+        data_dir = input_file.replace(".dim", ".data")
+        shutil.rmtree(data_dir)
+
+
+def gpt(input_file, command, *args):
+    print(f"\n{command}")
+    system_command = ["gpt", command, f"-Ssource={input_file}", "-t", command] + list(args)
+    system_call(system_command)
+    cleanup(input_file)
+    return f"{command}.dim"
+
+
+def create_geotiff_from_img(input_file, output_file):
+    print(f"\nCreating {output_file}")
+    temp_file = "temp.tif"
+    system_call(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", input_file, temp_file])
+    system_call(["gdaladdo", "-r", "average", temp_file, "2", "4", "8", "16"])
+    system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file, output_file])
+    cleanup(temp_file)
 
 
 if __name__ == "__main__":
@@ -82,42 +103,23 @@ if __name__ == "__main__":
     print("\nFetching Granule Information")
     download_url = get_download_url(args.granule)
     if download_url is None:
-        print("\nERROR: Either " + args.granule + " does exist or it is not a GRD product.")
+        print(f"\nERROR: Either {args.granule} does exist or it is not a GRD product.")
         exit(1)
 
-    print("\nDownloading Granule from " + download_url)
+    print(f"\nDownloading granule from {download_url}")
     write_netrc_file(args.username, args.password)
     local_file = download_file(download_url)
 
-    print("\nApplying Orbit File")
-    system_call(["gpt", "Apply-Orbit-File", "-Ssource=" + local_file, "-t",  "Orb"])
-    os.unlink(local_file)
+    local_file = gpt(local_file, "Apply-Orbit-File")
+    local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
+    local_file = gpt(local_file, "Speckle-Filter")
+    local_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False")
+    local_file = gpt(local_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT")
 
-    print("\nRunning Calibration")
-    system_call(["gpt", "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false", "-Ssource=Orb.dim", "-t", "Cal"])
-    delete_dim_files("Orb")
-
-    print("\nRunning Speckle Filter")
-    system_call(["gpt", "Speckle-Filter", "-Ssource=Cal.dim", "-t", "Spk"])
-    delete_dim_files("Cal")
-
-    print("\nRunning Terrain Flattening")
-    system_call(["gpt", "Terrain-Flattening", "-PreGridMethod=False", "-Ssource=Spk.dim", "-t", "TF"])
-    delete_dim_files("Spk")
-
-    print("\nRunning Terrain Correction")
-    system_call(["gpt", "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT", "-Ssource=TF.dim", "-t", "TC"])
-
-    delete_dim_files("TF")
-
-    for file_name in os.listdir("TC.data"):
+    data_dir = local_file.replace(".dim", ".data")
+    for file_name in os.listdir(data_dir):
         if file_name.endswith(".img"):
             polarization = file_name[-6:-4]
-            temp_file_name = "temp.tif"
-            output_file_name = args.granule + "_" + polarization + "_RTC.tif"
-            print("\nCreating " + output_file_name)
-            system_call(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", "TC.data/" + file_name, temp_file_name])
-            system_call(["gdaladdo", "-r", "average", temp_file_name, "2", "4", "8", "16"])
-            system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file_name, "/output/" + output_file_name])
-            os.unlink(temp_file_name)
-    delete_dim_files("TC")
+            output_file_name = f"/output/{args.granule}_{polarization}_RTC.tif"
+            create_geotiff_from_img(f"{data_dir}/{file_name}", output_file_name)
+    cleanup(local_file)
