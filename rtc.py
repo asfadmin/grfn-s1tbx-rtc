@@ -62,7 +62,7 @@ def get_args():
 def write_netrc_file(username, password):
     netrc_file = os.environ["HOME"] + "/.netrc"
     with open(netrc_file, "w") as f:
-        f.write("machine urs.earthdata.nasa.gov login " + username + " password " + password)
+        f.write(f"machine urs.earthdata.nasa.gov login {username} password {password}")
 
 
 def system_call(params):
@@ -81,15 +81,15 @@ def cleanup(input_file):
 
 
 def gpt(input_file, command, *args):
-    print("\n" + command)
-    system_command = ["gpt", command, "-Ssource=" + input_file, "-t", command] + list(args)
+    print(f"\n{command}")
+    system_command = ["gpt", command, f"-Ssource={input_file}", "-t", command] + list(args)
     system_call(system_command)
     cleanup(input_file)
-    return command + ".dim"
+    return f"{command}.dim"
 
 
 def create_geotiff_from_img(input_file, output_file):
-    print("\nCreating " + output_file)
+    print(f"\nCreating {output_file}")
     temp_file = "temp.tif"
     system_call(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", input_file, temp_file])
     system_call(["gdaladdo", "-r", "average", temp_file, "2", "4", "8", "16"])
@@ -103,10 +103,10 @@ if __name__ == "__main__":
     print("\nFetching Granule Information")
     download_url = get_download_url(args.granule)
     if download_url is None:
-        print("\nERROR: Either " + args.granule + " does exist or it is not a GRD product.")
+        print(f"\nERROR: Either {args.granule} does exist or it is not a GRD product.")
         exit(1)
 
-    print("\nDownloading granule from " + download_url)
+    print(f"\nDownloading granule from {download_url}")
     write_netrc_file(args.username, args.password)
     local_file = download_file(download_url)
 
@@ -120,6 +120,6 @@ if __name__ == "__main__":
     for file_name in os.listdir(data_dir):
         if file_name.endswith(".img"):
             polarization = file_name[-6:-4]
-            output_file_name = "/output/" + args.granule + "_" + polarization + "_RTC.tif"
-            create_geotiff_from_img(data_dir + "/" + file_name, output_file_name)
+            output_file_name = f"/output/{args.granule}_{polarization}_RTC.tif"
+            create_geotiff_from_img(f"{data_dir}/{file_name}", output_file_name)
     cleanup(local_file)
