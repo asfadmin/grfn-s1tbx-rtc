@@ -102,7 +102,7 @@ if __name__ == "__main__":
     delete_dim_files("Cal")
 
     print("\nRunning Terrain Flattening")
-    system_call(["gpt", "Terrain-Flattening", "-PdemName=SRTM 1Sec HGT", "-PreGridMethod=False", "-Ssource=Spk.dim", "-t", "TF"])
+    system_call(["gpt", "Terrain-Flattening", "-PreGridMethod=False", "-Ssource=Spk.dim", "-t", "TF"])
     delete_dim_files("Spk")
 
     print("\nRunning Terrain Correction")
