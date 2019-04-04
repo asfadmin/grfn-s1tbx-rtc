@@ -113,6 +113,7 @@ if __name__ == "__main__":
     local_file = gpt(local_file, "Apply-Orbit-File")
     local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
     local_file = gpt(local_file, "Speckle-Filter")
+    local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
     local_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False")
     local_file = gpt(local_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT")
 
