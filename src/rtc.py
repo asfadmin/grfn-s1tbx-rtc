@@ -1,10 +1,13 @@
 #!/usr/local/bin/python
 
 import os
-import argparse
 import requests
 import subprocess
-import shutil
+from argparse import ArgumentParser
+from shutil import rmtree
+from datetime import datetime
+from jinja2 import Template
+from lxml import etree
 
 CHUNK_SIZE=5242880
 CMR_URL = "https://cmr.earthdata.nasa.gov/search/granules.json"
@@ -51,7 +54,7 @@ def get_download_url(granule):
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Radiometric Terrain Correction using the SENTINEL-1 Toolbox")
+    parser = ArgumentParser(description="Radiometric Terrain Correction using the SENTINEL-1 Toolbox")
     parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 Granule Name", required=True)
     parser.add_argument("--username", "-u", type=str, help="Earthdata Login Username", required=True)
     parser.add_argument("--password", "-p", type=str, help="Earthdata Login Password", required=True)
@@ -77,7 +80,7 @@ def cleanup(input_file):
     os.unlink(input_file)
     if input_file.endswith(".dim"):
         data_dir = input_file.replace(".dim", ".data")
-        shutil.rmtree(data_dir)
+        rmtree(data_dir)
 
 
 def gpt(input_file, command, *args):
@@ -95,6 +98,34 @@ def create_geotiff_from_img(input_file, output_file):
     system_call(["gdaladdo", "-r", "average", temp_file, "2", "4", "8", "16"])
     system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file, output_file])
     cleanup(temp_file)
+
+
+def get_xml_template():
+    with open('arcgis_template.xml', 'r') as t:
+        template_text = t.read()
+    template = Template(template_text)
+    return template
+
+
+def pretty_print_xml(content):
+    parser = etree.XMLParser(remove_blank_text=True)
+    root = etree.fromstring(content, parser)
+    pretty_printed = etree.tostring(root, pretty_print=True)
+    return pretty_printed
+
+
+def create_arcgis_xml(input_granule, output_file, polarization):
+    template = get_xml_template()
+    data = {
+       'now': datetime.utcnow(),
+       'polarization': polarization,
+       'input_granule': input_granule,
+       'acquisition_year': input_granule[17:21],
+    }
+    rendered = template.render(data)
+    pretty_printed = pretty_print_xml(rendered)
+    with open(output_file, 'wb') as f:
+        f.write(pretty_printed)
 
 
 if __name__ == "__main__":
@@ -121,6 +152,7 @@ if __name__ == "__main__":
     for file_name in os.listdir(data_dir):
         if file_name.endswith(".img"):
             polarization = file_name[-6:-4]
-            output_file_name = f"/output/{args.granule}_{polarization}_RTC.tif"
-            create_geotiff_from_img(f"{data_dir}/{file_name}", output_file_name)
+            tif_file_name = f"/output/{args.granule}_{polarization}_RTC.tif"
+            create_geotiff_from_img(f"{data_dir}/{file_name}", tif_file_name)
+            create_arcgis_xml(args.granule, f"{tif_file_name}.xml", polarization)
     cleanup(local_file)
