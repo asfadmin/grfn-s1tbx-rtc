@@ -144,7 +144,7 @@ if __name__ == "__main__":
     for file_name in os.listdir(data_dir):
         if file_name.endswith(".img"):
             polarization = file_name[-6:-4]
-            output_file_name = f"/output/{args.granule}_{polarization}_RTC"
-            create_geotiff_from_img(f"{data_dir}/{file_name}", f"{output_file_name}.tif")
-            create_arcgis_xml(args.granule, f"{output_file_name}.xml", polarization)
+            tif_file_name = f"/output/{args.granule}_{polarization}_RTC.tif"
+            create_geotiff_from_img(f"{data_dir}/{file_name}", tif_file_name)
+            create_arcgis_xml(args.granule, f"{tif_file_name}.xml", polarization)
     cleanup(local_file)
