@@ -103,7 +103,7 @@
           <RoleCd value="002" />
         </role>
         <rpCntInfo>
-          {{ conact_info }}
+          {{ contact_info }}
         </rpCntInfo>
         <displayName>{{ asf }}</displayName>
       </maintCont>
