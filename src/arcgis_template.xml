@@ -16,8 +16,8 @@
 {% endset %}
 <metadata xml:lang="en">
   <Esri>
-    <CreaDate>{{ now.strftime('%Y%m%d') }}</CreaDate>
-    <CreaTime>{{ now.strftime('%H%M%S') }}</CreaTime>
+    <CreaDate>{{ date }}</CreaDate>
+    <CreaTime>{{ time }}</CreaTime>
     <ArcGISFormat>1.0</ArcGISFormat>
     <ArcGISstyle>North American Profile of ISO19115 2003</ArcGISstyle>
     <SyncOnce>TRUE</SyncOnce>
