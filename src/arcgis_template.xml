@@ -36,21 +36,29 @@
   </Esri>
   <dataIdInfo>
     <idPurp>This file is a Radiometric Terrain Corrected granule of GRD SAR data from the Sentinel-1 mission, processed using S1TBX software. Cell values indicate {{ polarization }} gamma-0 power, and pixel spacing is 30m.</idPurp>
-    <idAbs>
-      &lt;DIV STYLE="text-align:Left;"&gt;
-      &lt;P&gt;This Radiometric Terrain Corrected (RTC) product is derived from a Ground Range Detected (GRD) granule of Synthetic Aperture Radar data from the Copernicus Sentinel-1 mission (European Space Agency), generated using Sentinel-1 Toolbox (S1TBX) release 6.0. It is projected to WGS 84 and is corrected for terrain using a digital elevation model (DEM). The DEM used for this product is SRTMGL1 (about 30m resolution).&lt;/P&gt;
-      &lt;P&gt;Processing Date/Time: {{ date }} {{ time }} UTC&lt;/P&gt;
-      &lt;P&gt;In the filename, VV (HH) indicates the primary polarization, while VH (HV) indicates cross-polarization. To learn more about polarimetry, refer to &lt;A href="https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/product-overview/polarimetry"&gt;https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/product-overview/polarimetry&lt;/A&gt;&lt;/P&gt;
-      &lt;P&gt;The name of the granule used to generate this TIFF file is: {{ input_granule }}. For a detailed description of the Sentinel-1 file naming convention, refer to &lt;A href="https://www.asf.alaska.edu/sentinel/data/#naming"&gt;https://www.asf.alaska.edu/sentinel/data/#naming&lt;/A&gt;&lt;/P&gt;
-      &lt;P&gt;The side-looking geometry of SAR imagery leads to geometric and radiometric distortions, causing foreshortening, layover, shadowing, and radiometric variations due to terrain slope. Radiometric terrain correction converts unprocessed SAR data into geocoded tiff images with values directly relating to physical properties, alleviating the inherent SAR distortions. The process improves backscatter estimates and provides geolocation information, so images can be used as input for applications such as the monitoring of deforestation, land-cover classification, and delineation of wet snow-covered areas.&lt;/P&gt;
-      &lt;P&gt;Cell values indicate {{ polarization }} gamma nought power, and pixel spacing is 30m. Since the output is in power rather than amplitude, the images may appear mostly black when first displayed. Consider setting the layer symbology to Stretched - Standard Deviations (choose a number (n) that works best for your particular dataset; the ArcGIS default of n: 2.5 will improve the display, but other values may give a better visualization).&lt;/P&gt;
-      &lt;P&gt;This product was processed using 3 looks. Multi-looking is the process of coherently averaging together pixels of an image. The overall effect of multi-looking is to reduce the noise level, thus reducing speckle, at the cost of decreased resolution.&lt;/P&gt;
-      &lt;P&gt;The S1TBX default Speckle Filter is applied during RTC processing to remove speckle while preserving edges. When applied, it is a Lee Sigma filter set to one look with a window size of 7x7, a sigma of 0.9 and a target window size of 3x3.&lt;/P&gt;
-      &lt;P&gt;You may wish to explore the filtering options available in ArcGIS rather than ordering imagery with a filter already applied. There are many options for different speckle filter functions to be applied on the fly using the Image Analysis window. To learn more about speckle filtering options, refer to &lt;A href="http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/speckle-function.htm"&gt;http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/speckle-function.htm&lt;/A&gt; and to learn how apply a function (such as a speckle filter) to a raster, refer to &lt;A href="http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/editing-functions-on-a-raster-dataset.htm"&gt;http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/editing-functions-on-a-raster-dataset.htm&lt;/A&gt;&lt;/P&gt;
-      &lt;P&gt;For areas where there is not a publicly-available digital elevation model (i.e. sea ice), geocoded products without terrain correction are also available from &lt;A href="http://hyp3.asf.alaska.edu/"&gt;http://hyp3.asf.alaska.edu/&lt;/A&gt;&lt;/P&gt;
-      &lt;P&gt;The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;A href="https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1"&gt;https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1&lt;/A&gt;&lt;/P&gt;
-      &lt;P&gt;Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;A href="https://www.asf.alaska.edu/sentinel/"&gt;https://www.asf.alaska.edu/sentinel/&lt;/A&gt;&lt;/P&gt;
-      &lt;/DIV&gt;
+    <idAbs>This Radiometric Terrain Corrected (RTC) product is derived from a Ground Range Detected (GRD) granule of Synthetic Aperture Radar data from the Copernicus Sentinel-1 mission (European Space Agency), generated using Sentinel-1 Toolbox (S1TBX) release 6.0. It is projected to WGS 84 and is corrected for terrain using a digital elevation model (DEM). The DEM used for this product is SRTMGL1 (about 30m resolution).
+
+Processing Date/Time: {{ date }} {{ time }} UTC
+
+In the filename, VV (HH) indicates the primary polarization, while VH (HV) indicates cross-polarization. To learn more about polarimetry, refer to &lt;A href="https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/product-overview/polarimetry"&gt;https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/product-overview/polarimetry&lt;/A&gt;
+
+The name of the granule used to generate this TIFF file is: {{ input_granule }}. For a detailed description of the Sentinel-1 file naming convention, refer to &lt;A href="https://www.asf.alaska.edu/sentinel/data/#naming"&gt;https://www.asf.alaska.edu/sentinel/data/#naming&lt;/A&gt;
+
+The side-looking geometry of SAR imagery leads to geometric and radiometric distortions, causing foreshortening, layover, shadowing, and radiometric variations due to terrain slope. Radiometric terrain correction converts unprocessed SAR data into geocoded tiff images with values directly relating to physical properties, alleviating the inherent SAR distortions. The process improves backscatter estimates and provides geolocation information, so images can be used as input for applications such as the monitoring of deforestation, land-cover classification, and delineation of wet snow-covered areas.
+
+Cell values indicate {{ polarization }} gamma nought power, and pixel spacing is 30m. Since the output is in power rather than amplitude, the images may appear mostly black when first displayed. Consider setting the layer symbology to Stretched - Standard Deviations (choose a number (n) that works best for your particular dataset; the ArcGIS default of n: 2.5 will improve the display, but other values may give a better visualization).
+
+This product was processed using 3 looks. Multi-looking is the process of coherently averaging together pixels of an image. The overall effect of multi-looking is to reduce the noise level, thus reducing speckle, at the cost of decreased resolution.
+
+The S1TBX default Speckle Filter is applied during RTC processing to remove speckle while preserving edges. When applied, it is a Lee Sigma filter set to one look with a window size of 7x7, a sigma of 0.9 and a target window size of 3x3.
+
+You may wish to explore the filtering options available in ArcGIS rather than ordering imagery with a filter already applied. There are many options for different speckle filter functions to be applied on the fly using the Image Analysis window. To learn more about speckle filtering options, refer to &lt;A href="http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/speckle-function.htm"&gt;http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/speckle-function.htm&lt;/A&gt; and to learn how apply a function (such as a speckle filter) to a raster, refer to &lt;A href="http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/editing-functions-on-a-raster-dataset.htm"&gt;http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/editing-functions-on-a-raster-dataset.htm&lt;/A&gt;
+
+For areas where there is not a publicly-available digital elevation model (i.e. sea ice), geocoded products without terrain correction are also available from &lt;A href="http://hyp3.asf.alaska.edu/"&gt;http://hyp3.asf.alaska.edu/&lt;/A&gt;
+
+The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;A href="https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1"&gt;https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1&lt;/A&gt;
+
+Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;A href="https://www.asf.alaska.edu/sentinel/"&gt;https://www.asf.alaska.edu/sentinel/&lt;/A&gt;
     </idAbs>
     <idCredit>ASF DAAC {{ now.strftime('%Y') }} using S1TBX software. Contains modified Copernicus Sentinel data {{ acquisition_year }}, processed by ESA.</idCredit>
     <idCitation>
@@ -110,7 +118,7 @@
     </resMaint>
     <resConst>
       <Consts>
-        <useLimit>&lt;DIV STYLE="text-align:Left;"&gt;&lt;P&gt;There are no restrictions on the use of this data, but it must be cited as listed in the credits.&lt;/P&gt;&lt;/DIV&gt;</useLimit>
+        <useLimit>There are no restrictions on the use of this data, but it must be cited as listed in the credits.</useLimit>
       </Consts>
     </resConst>
     <envirDesc>This product was generated using S1TBX release 6.0.</envirDesc>
@@ -191,9 +199,4 @@
   <refSysInfo>
     <RefSystem dimension="horizontal" />
   </refSysInfo>
-  <Binary>
-    <Thumbnail>
-      <Data EsriPropertyType="PictureX">[THUMBNAIL_BINARY_STRING]</Data>
-    </Thumbnail>
-  </Binary>
 </metadata>
