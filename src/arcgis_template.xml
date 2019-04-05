@@ -1,0 +1,199 @@
+{% set date = now.strftime('%Y%m%d') %}
+{% set time = now.strftime('%H%M%S') %}
+{% set asf = 'Alaska Satellite Facility' %}
+{% set contact_info %}
+  <cntAddress addressType="physical">
+    <delPoint>2156 Koyukuk Dr.</delPoint>
+    <city>Fairbanks</city>
+    <adminArea>Alaska</adminArea>
+    <postCode>99775-7320</postCode>
+    <eMailAdd>uso@asf.alaska.edu</eMailAdd>
+    <country>US</country>
+  </cntAddress>
+  <cntPhone>
+    <voiceNum tddtty="">907-474-5041</voiceNum>
+  </cntPhone>
+{% endset %}
+<metadata xml:lang="en">
+  <Esri>
+    <CreaDate>{{ now.strftime('%Y%m%d') }}</CreaDate>
+    <CreaTime>{{ now.strftime('%H%M%S') }}</CreaTime>
+    <ArcGISFormat>1.0</ArcGISFormat>
+    <ArcGISstyle>North American Profile of ISO19115 2003</ArcGISstyle>
+    <SyncOnce>TRUE</SyncOnce>
+    <scaleRange>
+      <minScale>150000000</minScale>
+      <maxScale>5000</maxScale>
+    </scaleRange>
+    <DataProperties>
+      <itemProps>
+        <imsContentType export="False">002</imsContentType>
+      </itemProps>
+    </DataProperties>
+    <ArcGISProfile>NAP</ArcGISProfile>
+    <ModDate>{{ date }}</ModDate>
+    <ModTime>{{ time }}</ModTime>
+  </Esri>
+  <dataIdInfo>
+    <idPurp>This file is a Radiometric Terrain Corrected granule of GRD SAR data from the Sentinel-1 mission, processed using S1TBX software. Cell values indicate {{ polarization }} gamma-0 power, and pixel spacing is 30m.</idPurp>
+    <idAbs>
+      &lt;DIV STYLE="text-align:Left;"&gt;
+      &lt;P&gt;This Radiometric Terrain Corrected (RTC) product is derived from a Ground Range Detected (GRD) granule of Synthetic Aperture Radar data from the Copernicus Sentinel-1 mission (European Space Agency), generated using Sentinel-1 Toolbox (S1TBX) release 6.0. It is projected to WGS 84 and is corrected for terrain using a digital elevation model (DEM). The DEM used for this product is SRTMGL1 (about 30m resolution).&lt;/P&gt;
+      &lt;P&gt;Processing Date/Time: {{ date }} {{ time }} UTC&lt;/P&gt;
+      &lt;P&gt;In the filename, VV (HH) indicates the primary polarization, while VH (HV) indicates cross-polarization. To learn more about polarimetry, refer to &lt;A href="https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/product-overview/polarimetry"&gt;https://sentinel.esa.int/web/sentinel/user-guides/sentinel-1-sar/product-overview/polarimetry&lt;/A&gt;&lt;/P&gt;
+      &lt;P&gt;The name of the granule used to generate this TIFF file is: {{ input_granule }}. For a detailed description of the Sentinel-1 file naming convention, refer to &lt;A href="https://www.asf.alaska.edu/sentinel/data/#naming"&gt;https://www.asf.alaska.edu/sentinel/data/#naming&lt;/A&gt;&lt;/P&gt;
+      &lt;P&gt;The side-looking geometry of SAR imagery leads to geometric and radiometric distortions, causing foreshortening, layover, shadowing, and radiometric variations due to terrain slope. Radiometric terrain correction converts unprocessed SAR data into geocoded tiff images with values directly relating to physical properties, alleviating the inherent SAR distortions. The process improves backscatter estimates and provides geolocation information, so images can be used as input for applications such as the monitoring of deforestation, land-cover classification, and delineation of wet snow-covered areas.&lt;/P&gt;
+      &lt;P&gt;Cell values indicate {{ polarization }} gamma nought power, and pixel spacing is 30m. Since the output is in power rather than amplitude, the images may appear mostly black when first displayed. Consider setting the layer symbology to Stretched - Standard Deviations (choose a number (n) that works best for your particular dataset; the ArcGIS default of n: 2.5 will improve the display, but other values may give a better visualization).&lt;/P&gt;
+      &lt;P&gt;This product was processed using 3 looks. Multi-looking is the process of coherently averaging together pixels of an image. The overall effect of multi-looking is to reduce the noise level, thus reducing speckle, at the cost of decreased resolution.&lt;/P&gt;
+      &lt;P&gt;The S1TBX default Speckle Filter is applied during RTC processing to remove speckle while preserving edges. When applied, it is a Lee Sigma filter set to one look with a window size of 7x7, a sigma of 0.9 and a target window size of 3x3.&lt;/P&gt;
+      &lt;P&gt;You may wish to explore the filtering options available in ArcGIS rather than ordering imagery with a filter already applied. There are many options for different speckle filter functions to be applied on the fly using the Image Analysis window. To learn more about speckle filtering options, refer to &lt;A href="http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/speckle-function.htm"&gt;http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/speckle-function.htm&lt;/A&gt; and to learn how apply a function (such as a speckle filter) to a raster, refer to &lt;A href="http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/editing-functions-on-a-raster-dataset.htm"&gt;http://desktop.arcgis.com/en/arcmap/latest/manage-data/raster-and-images/editing-functions-on-a-raster-dataset.htm&lt;/A&gt;&lt;/P&gt;
+      &lt;P&gt;For areas where there is not a publicly-available digital elevation model (i.e. sea ice), geocoded products without terrain correction are also available from &lt;A href="http://hyp3.asf.alaska.edu/"&gt;http://hyp3.asf.alaska.edu/&lt;/A&gt;&lt;/P&gt;
+      &lt;P&gt;The Sentinel-1A satellite was launched April 3, 2014, and the Sentinel-1B satellite was launched April 25, 2016. The satellites each have a 12-day repeat cycle. More information about the mission is available at &lt;A href="https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1"&gt;https://earth.esa.int/web/guest/missions/esa-operational-eo-missions/sentinel-1&lt;/A&gt;&lt;/P&gt;
+      &lt;P&gt;Additional information about Sentinel-1 data, imagery, tools and applications is available at &lt;A href="https://www.asf.alaska.edu/sentinel/"&gt;https://www.asf.alaska.edu/sentinel/&lt;/A&gt;&lt;/P&gt;
+      &lt;/DIV&gt;
+    </idAbs>
+    <idCredit>ASF DAAC {{ now.strftime('%Y') }} using S1TBX software. Contains modified Copernicus Sentinel data {{ acquisition_year }}, processed by ESA.</idCredit>
+    <idCitation>
+      <date>
+        <pubDate>{{ now.strftime('%Y-%m-%dT%H:%M:%S') }}</pubDate>
+      </date>
+      <citRespParty>
+        <rpOrgName>{{ asf }}</rpOrgName>
+        <role>
+          <RoleCd value="007" />
+        </role>
+        <rpCntInfo>
+          {{ contact_info }}
+        </rpCntInfo>
+      </citRespParty>
+    </idCitation>
+    <searchKeys>
+      <keyword>{{ asf }}</keyword>
+      <keyword>ASF</keyword>
+      <keyword>Synthetic Aperture Radar</keyword>
+      <keyword>SAR</keyword>
+      <keyword>Radiometric Terrain Correction</keyword>
+      <keyword>RTC</keyword>
+      <keyword>Sentinel-1</keyword>
+    </searchKeys>
+    <dataLang>
+      <languageCode value="eng" />
+      <countryCode value="US" />
+    </dataLang>
+    <dataChar>
+      <CharSetCd value="004" />
+    </dataChar>
+    <idPoC>
+      <rpOrgName>{{ asf }}</rpOrgName>
+      <role>
+         <RoleCd value="010" />
+      </role>
+      <rpCntInfo>
+        {{ contact_info }}
+      </rpCntInfo>
+      <displayName>{{ asf }}</displayName>
+    </idPoC>
+    <resMaint>
+      <maintFreq>
+        <MaintFreqCd value="009" />
+      </maintFreq>
+      <maintCont>
+        <rpOrgName>{{ asf }}</rpOrgName>
+        <role>
+          <RoleCd value="002" />
+        </role>
+        <rpCntInfo>
+          {{ conact_info }}
+        </rpCntInfo>
+        <displayName>{{ asf }}</displayName>
+      </maintCont>
+    </resMaint>
+    <resConst>
+      <Consts>
+        <useLimit>&lt;DIV STYLE="text-align:Left;"&gt;&lt;P&gt;There are no restrictions on the use of this data, but it must be cited as listed in the credits.&lt;/P&gt;&lt;/DIV&gt;</useLimit>
+      </Consts>
+    </resConst>
+    <envirDesc>This product was generated using S1TBX release 6.0.</envirDesc>
+    <tpCat>
+      <TopicCatCd value="008" />
+    </tpCat>
+  </dataIdInfo>
+  <mdHrLv>
+   <ScopeCd value="005" />
+  </mdHrLv>
+  <mdFileID>RTC_S1TBX_Template_190318</mdFileID>
+  <mdLang>
+    <languageCode value="eng" />
+    <countryCode value="US" />
+  </mdLang>
+  <mdChar>
+    <CharSetCd value="004" />
+  </mdChar>
+  <mdDateSt>{{ date }}</mdDateSt>
+  <dataSetFn>
+    <OnFunctCd value="001" />
+  </dataSetFn>
+  <mdContact>
+    <rpOrgName>{{ asf }}</rpOrgName>
+    <role>
+      <RoleCd value="006" />
+    </role>
+    <rpCntInfo>
+      {{ contact_info }}
+    </rpCntInfo>
+    <displayName>{{ asf }}</displayName>
+  </mdContact>
+  <dqInfo>
+    <dqScope>
+      <scpLvl>
+        <ScopeCd value="005" />
+      </scpLvl>
+    </dqScope>
+    <dataLineage>
+       <statement>Steps in Radiometric Terrain Correction of Sentinel-1 Data using Sentinel-1 Toolbox (S1TBX):
+1. Download and apply precision orbit information
+2. Apply calibration parameters
+3. Apply speckle filtering
+4. Multi-look dataset. For GRD 30-meter product, 3 x 3 looks are used.
+5. Apply radiometric terrain flattening
+6. Apply terrain correction
+7. Post processing creates GeoTIFF files</statement>
+    </dataLineage>
+  </dqInfo>
+  <mdMaint>
+    <maintFreq>
+      <MaintFreqCd value="009" />
+    </maintFreq>
+  </mdMaint>
+  <contInfo>
+    <ImgDesc>
+      <attDesc>{{ polarization }} gamma-0 power</attDesc>
+      <trianInd>False</trianInd>
+      <radCalDatAv>False</radCalDatAv>
+      <camCalInAv>False</camCalInAv>
+      <filmDistInAv>False</filmDistInAv>
+      <lensDistInAv>False</lensDistInAv>
+      <contentTyp>
+        <ContentTypCd value="001" />
+      </contentTyp>
+      <covDim>
+        <Band>
+          <seqID>
+            <aName>C-band</aName>
+            <attributeType>
+              <aName>SAR</aName>
+            </attributeType>
+          </seqID>
+        </Band>
+      </covDim>
+    </ImgDesc>
+  </contInfo>
+  <refSysInfo>
+    <RefSystem dimension="horizontal" />
+  </refSysInfo>
+  <Binary>
+    <Thumbnail>
+      <Data EsriPropertyType="PictureX">[THUMBNAIL_BINARY_STRING]</Data>
+    </Thumbnail>
+  </Binary>
+</metadata>

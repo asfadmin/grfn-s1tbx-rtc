@@ -10,11 +10,13 @@ RUN apt-get update && \
     wget --no-verbose --directory-prefix=/usr/local/etc/ http://step.esa.int/downloads/6.0/installers/esa-snap_sentinel_unix_6_0.sh && \
     sh /usr/local/etc/esa-snap_sentinel_unix_6_0.sh -q -varfile /usr/local/etc/snap_install.varfile && \
     rm /usr/local/etc/esa-snap_sentinel_unix_6_0.sh && \
-    pip3 install requests && \
+    pip3 install requests jinja2 lxml && \
     mkdir /output
 
 COPY gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
-COPY rtc.py /usr/local/sbin/
 ENV PATH=$PATH:/usr/local/snap/bin
+ENV HOME=/root
+WORKDIR $HOME
+COPY src $HOME
 
-ENTRYPOINT ["python3", "-u", "/usr/local/sbin/rtc.py"]
+ENTRYPOINT ["python3", "-u", "rtc.py"]
