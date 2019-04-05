@@ -1,10 +1,10 @@
 #!/usr/local/bin/python
 
 import os
-import argparse
 import requests
 import subprocess
-import shutil
+from argparse import ArgumentParser
+from shutil import rmtree
 from datetime import datetime
 from jinja2 import Template
 from lxml import etree
@@ -54,7 +54,7 @@ def get_download_url(granule):
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Radiometric Terrain Correction using the SENTINEL-1 Toolbox")
+    parser = ArgumentParser(description="Radiometric Terrain Correction using the SENTINEL-1 Toolbox")
     parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 Granule Name", required=True)
     parser.add_argument("--username", "-u", type=str, help="Earthdata Login Username", required=True)
     parser.add_argument("--password", "-p", type=str, help="Earthdata Login Password", required=True)
@@ -80,7 +80,7 @@ def cleanup(input_file):
     os.unlink(input_file)
     if input_file.endswith(".dim"):
         data_dir = input_file.replace(".dim", ".data")
-        shutil.rmtree(data_dir)
+        rmtree(data_dir)
 
 
 def gpt(input_file, command, *args):
@@ -100,24 +100,32 @@ def create_geotiff_from_img(input_file, output_file):
     cleanup(temp_file)
 
 
-def create_arcgis_xml(input_granule, output_file, polarization):
-    TEMPLATE_FILE = 'arcgis_template.xml'
-    with open(TEMPLATE_FILE, 'r') as t:
+def get_xml_template():
+    with open('arcgis_template.xml', 'r') as t:
         template_text = t.read()
     template = Template(template_text)
+    return template
 
+
+def pretty_print_xml(content):
+    parser = etree.XMLParser(remove_blank_text=True)
+    root = etree.fromstring(content, parser)
+    pretty_printed = etree.tostring(root, pretty_print=True)
+    return pretty_printed
+
+
+def create_arcgis_xml(input_granule, output_file, polarization):
+    template = get_xml_template()
     data = {
        'now': datetime.utcnow(),
        'polarization': polarization,
        'input_granule': input_granule,
        'acquisition_year': input_granule[17:21],
     }
-
     rendered = template.render(data)
-    parser = etree.XMLParser(remove_blank_text=True)
-    root = etree.fromstring(rendered, parser)
+    pretty_printed = pretty_print_xml(rendered)
     with open(output_file, 'wb') as f:
-        f.write(etree.tostring(root, pretty_print=True))
+        f.write(pretty_printed)
 
 
 if __name__ == "__main__":
