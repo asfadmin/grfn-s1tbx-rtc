@@ -157,7 +157,7 @@ if __name__ == "__main__":
     local_file = download_file(download_url)
 
     local_file = gpt(local_file, "Apply-Orbit-File")
-    local_file = gpt(local_file, "Calibration", "-PoutputBeaBand=true", "-PoutputSigmaBand=false")
+    local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
     local_file = gpt(local_file, "Speckle-Filter")
     local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
     terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False")
