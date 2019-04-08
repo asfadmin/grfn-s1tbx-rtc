@@ -68,10 +68,10 @@ def get_download_url(granule):
 
 def get_args():
     parser = ArgumentParser(description="Radiometric Terrain Correction using the SENTINEL-1 Toolbox")
-    parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 Granule Name", required=True)
-    parser.add_argument("--username", "-u", type=str, help="Earthdata Login Username", required=True)
-    parser.add_argument("--password", "-p", type=str, help="Earthdata Login Password", required=True)
-    parser.add_argument("--layover", "-l", type=bool, help="Earthdata Login Password")
+    parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 granule name", required=True)
+    parser.add_argument("--username", "-u", type=str, help="Earthdata login username", required=True)
+    parser.add_argument("--password", "-p", type=str, help="Earthdata login password", required=True)
+    parser.add_argument("--layover", "-l", action='store_true', help="Include layover shadow mask in Ouput")
     args = parser.parse_args()
     return args
 
