@@ -58,6 +58,7 @@ def get_args():
     parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 Granule Name", required=True)
     parser.add_argument("--username", "-u", type=str, help="Earthdata Login Username", required=True)
     parser.add_argument("--password", "-p", type=str, help="Earthdata Login Password", required=True)
+    parser.add_argument("--layover", "-l", type=bool, help="Earthdata Login Password")
     args = parser.parse_args()
     return args
 
@@ -83,11 +84,12 @@ def cleanup(input_file):
         rmtree(data_dir)
 
 
-def gpt(input_file, command, *args):
+def gpt(input_file, cleanup, command, *args):
     print(f"\n{command}")
     system_command = ["gpt", command, f"-Ssource={input_file}", "-t", command] + list(args)
     system_call(system_command)
-    cleanup(input_file)
+    if cleanup:
+        cleanup(input_file)
     return f"{command}.dim"
 
 
@@ -141,12 +143,17 @@ if __name__ == "__main__":
     write_netrc_file(args.username, args.password)
     local_file = download_file(download_url)
 
-    local_file = gpt(local_file, "Apply-Orbit-File")
-    local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
-    local_file = gpt(local_file, "Speckle-Filter")
-    local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
-    local_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False")
-    local_file = gpt(local_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT")
+    local_file = gpt(local_file, True, "Apply-Orbit-File")
+    local_file = gpt(local_file, True, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
+    local_file = gpt(local_file, True, "Speckle-Filter")
+    local_file = gpt(local_file, True, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
+    terrain_flattening_file = gpt(local_file, True, "Terrain-Flattening", "-PreGridMethod=False")
+    if args.layover:
+        local_file = gpt(terrain_flattening_file, False, "SAR-Simulation", "-PdemName=SRTM 1Sec HGT", "-PsaveLayoverShadowMask=true")
+        local_file = gpt(local_file, True, "Terrain-Correction", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", "-PdemName=SRTM 1Sec HGT")
+    local_file = gpt(terrain_flattening_file, True, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT")
+
+
 
     data_dir = local_file.replace(".dim", ".data")
     for file_name in os.listdir(data_dir):
