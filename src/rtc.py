@@ -9,7 +9,7 @@ from datetime import datetime
 from jinja2 import Template
 from lxml import etree
 
-CHUNK_SIZE=5242880
+CHUNK_SIZE = 5242880
 CMR_URL = "https://cmr.earthdata.nasa.gov/search/granules.json"
 COLLECTION_IDS = [
     "C1214470533-ASF", # SENTINEL-1A_DUAL_POL_GRD_HIGH_RES
@@ -24,7 +24,7 @@ COLLECTION_IDS = [
 USER_AGENT = "asfdaac/s1tbx-rtc"
 
 
-def process_img_files(local_file,extension,create_xml):
+def process_img_files(local_file, extension, create_xml=True):
     data_dir = local_file.replace(".dim", ".data")
     for file_name in os.listdir(data_dir):
         if file_name.endswith(".img"):
@@ -97,7 +97,7 @@ def cleanup(input_file):
         rmtree(data_dir)
 
 
-def gpt(input_file, command, *args, cleanup_flag):
+def gpt(input_file, command, *args, cleanup_flag=True):
     print(f"\n{command}")
     system_command = ["gpt", command, f"-Ssource={input_file}", "-t", command] + list(args)
     system_call(system_command)
@@ -132,10 +132,10 @@ def pretty_print_xml(content):
 def create_arcgis_xml(input_granule, output_file, polarization):
     template = get_xml_template()
     data = {
-       'now': datetime.utcnow(),
-       'polarization': polarization,
-       'input_granule': input_granule,
-       'acquisition_year': input_granule[17:21],
+        'now': datetime.utcnow(),
+        'polarization': polarization,
+        'input_granule': input_granule,
+        'acquisition_year': input_granule[17:21],
     }
     rendered = template.render(data)
     pretty_printed = pretty_print_xml(rendered)
@@ -156,18 +156,17 @@ if __name__ == "__main__":
     write_netrc_file(args.username, args.password)
     local_file = download_file(download_url)
 
-    local_file = gpt(local_file, "Apply-Orbit-File", cleanup_flag=True)
-    local_file = gpt(local_file, "Calibration", "-PoutputBeaBand=true", "-PoutputSigmaBand=false", cleanup_flag=True)
-    local_file = gpt(local_file, "Speckle-Filter", cleanup_flag=True)
-    local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3", cleanup_flag=True)
-    terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", cleanup_flag=True)
+    local_file = gpt(local_file, "Apply-Orbit-File")
+    local_file = gpt(local_file, "Calibration", "-PoutputBeaBand=true", "-PoutputSigmaBand=false")
+    local_file = gpt(local_file, "Speckle-Filter")
+    local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
+    terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False")
     if args.layover:
         local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=SRTM 1Sec HGT", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
-        local_file = gpt(local_file, "Terrain-Correction", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", "-PdemName=SRTM 1Sec HGT", cleanup_flag=True)
-        process_img_files(local_file,'LS.tif',create_xml=False)
+        local_file = gpt(local_file, "Terrain-Correction", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", "-PdemName=SRTM 1Sec HGT")
+        process_img_files(local_file, 'LS.tif', create_xml=False)
 
     local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT", cleanup_flag=True)
 
-
-    process_img_files(local_file,"RTC.tif",create_xml=True)
+    process_img_files(local_file, "RTC.tif")
 
