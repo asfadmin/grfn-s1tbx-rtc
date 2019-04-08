@@ -97,7 +97,7 @@ def cleanup(input_file):
         rmtree(data_dir)
 
 
-def gpt(input_file, cleanup_flag, command, *args):
+def gpt(input_file, command, *args, cleanup_flag):
     print(f"\n{command}")
     system_command = ["gpt", command, f"-Ssource={input_file}", "-t", command] + list(args)
     system_call(system_command)
@@ -156,18 +156,18 @@ if __name__ == "__main__":
     write_netrc_file(args.username, args.password)
     local_file = download_file(download_url)
 
-    local_file = gpt(local_file, True, "Apply-Orbit-File")
-    local_file = gpt(local_file, True, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
-    local_file = gpt(local_file, True, "Speckle-Filter")
-    local_file = gpt(local_file, True, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
-    terrain_flattening_file = gpt(local_file, True, "Terrain-Flattening", "-PreGridMethod=False")
+    local_file = gpt(local_file, "Apply-Orbit-File", cleanup_flag=True)
+    local_file = gpt(local_file, "Calibration", "-PoutputBeaBand=true", "-PoutputSigmaBand=false", cleanup_flag=True)
+    local_file = gpt(local_file, "Speckle-Filter", cleanup_flag=True)
+    local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3", cleanup_flag=True)
+    terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", cleanup_flag=True)
     if args.layover:
-        local_file = gpt(terrain_flattening_file, False, "SAR-Simulation", "-PdemName=SRTM 1Sec HGT", "-PsaveLayoverShadowMask=true")
-        local_file = gpt(local_file, True, "Terrain-Correction", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", "-PdemName=SRTM 1Sec HGT")
-        process_img_files(local_file,'LS.tif',False)
+        local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=SRTM 1Sec HGT", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
+        local_file = gpt(local_file, "Terrain-Correction", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", "-PdemName=SRTM 1Sec HGT", cleanup_flag=True)
+        process_img_files(local_file,'LS.tif',create_xml=False)
 
-    local_file = gpt(terrain_flattening_file, True, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT")
+    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT", cleanup_flag=True)
 
 
-    process_img_files(local_file,"RTC.tif",True)
+    process_img_files(local_file,"RTC.tif",create_xml=True)
 
