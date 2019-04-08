@@ -97,11 +97,11 @@ def cleanup(input_file):
         rmtree(data_dir)
 
 
-def gpt(input_file, cleanup, command, *args):
+def gpt(input_file, cleanup_flag, command, *args):
     print(f"\n{command}")
     system_command = ["gpt", command, f"-Ssource={input_file}", "-t", command] + list(args)
     system_call(system_command)
-    if cleanup:
+    if cleanup_flag:
         cleanup(input_file)
     return f"{command}.dim"
 
