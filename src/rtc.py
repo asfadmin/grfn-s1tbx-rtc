@@ -9,7 +9,7 @@ from datetime import datetime
 from jinja2 import Template
 from lxml import etree
 
-CHUNK_SIZE=5242880
+CHUNK_SIZE = 5242880
 CMR_URL = "https://cmr.earthdata.nasa.gov/search/granules.json"
 COLLECTION_IDS = [
     "C1214470533-ASF", # SENTINEL-1A_DUAL_POL_GRD_HIGH_RES
@@ -22,6 +22,25 @@ COLLECTION_IDS = [
     "C1327985740-ASF", # SENTINEL-1B_SINGLE_POL_GRD_MEDIUM_RES
 ]
 USER_AGENT = "asfdaac/s1tbx-rtc"
+
+
+def process_img_files(local_file, extension, create_xml=True, include_polarization=True):
+    data_dir = local_file.replace(".dim", ".data")
+    for file_name in os.listdir(data_dir):
+        if file_name.endswith(".img"):
+            polarization = file_name[-6:-4]
+            if include_polarization:
+                tif_file_name = f"/output/{args.granule}_{polarization}_{extension}"
+            else:
+                tif_file_name = f"/output/{args.granule}_{extension}"
+            if 'projectedLocalIncidenceAngle' in file_name:
+                tif_file_name = f"/output/{args.granule}_PIA.tif"
+            create_geotiff_from_img(f"{data_dir}/{file_name}", tif_file_name)
+            if create_xml and 'projectedLocalIncidenceAngle' not in file_name:
+                create_arcgis_xml(args.granule, f"{tif_file_name}.xml", polarization)
+
+    cleanup(local_file)
+    return None
 
 
 def download_file(url):
@@ -55,9 +74,11 @@ def get_download_url(granule):
 
 def get_args():
     parser = ArgumentParser(description="Radiometric Terrain Correction using the SENTINEL-1 Toolbox")
-    parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 Granule Name", required=True)
-    parser.add_argument("--username", "-u", type=str, help="Earthdata Login Username", required=True)
-    parser.add_argument("--password", "-p", type=str, help="Earthdata Login Password", required=True)
+    parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 granule name", required=True)
+    parser.add_argument("--username", "-u", type=str, help="Earthdata login username", required=True)
+    parser.add_argument("--password", "-p", type=str, help="Earthdata login password", required=True)
+    parser.add_argument("--layover", "-l", action='store_true', help="Include layover shadow mask in ouput")
+    parser.add_argument("--incidence_angle", "-i", action='store_true', help="Include incidence angle in ouput")
     args = parser.parse_args()
     return args
 
@@ -83,11 +104,12 @@ def cleanup(input_file):
         rmtree(data_dir)
 
 
-def gpt(input_file, command, *args):
+def gpt(input_file, command, *args, cleanup_flag=True):
     print(f"\n{command}")
     system_command = ["gpt", command, f"-Ssource={input_file}", "-t", command] + list(args)
     system_call(system_command)
-    cleanup(input_file)
+    if cleanup_flag:
+        cleanup(input_file)
     return f"{command}.dim"
 
 
@@ -117,10 +139,10 @@ def pretty_print_xml(content):
 def create_arcgis_xml(input_granule, output_file, polarization):
     template = get_xml_template()
     data = {
-       'now': datetime.utcnow(),
-       'polarization': polarization,
-       'input_granule': input_granule,
-       'acquisition_year': input_granule[17:21],
+        'now': datetime.utcnow(),
+        'polarization': polarization,
+        'input_granule': input_granule,
+        'acquisition_year': input_granule[17:21],
     }
     rendered = template.render(data)
     pretty_printed = pretty_print_xml(rendered)
@@ -130,6 +152,7 @@ def create_arcgis_xml(input_granule, output_file, polarization):
 
 if __name__ == "__main__":
     args = get_args()
+    inc_angle = "true" if args.incidence_angle else "false"
 
     print("\nFetching Granule Information")
     download_url = get_download_url(args.granule)
@@ -145,14 +168,13 @@ if __name__ == "__main__":
     local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
     local_file = gpt(local_file, "Speckle-Filter")
     local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
-    local_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False")
-    local_file = gpt(local_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT")
+    terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False")
 
-    data_dir = local_file.replace(".dim", ".data")
-    for file_name in os.listdir(data_dir):
-        if file_name.endswith(".img"):
-            polarization = file_name[-6:-4]
-            tif_file_name = f"/output/{args.granule}_{polarization}_RTC.tif"
-            create_geotiff_from_img(f"{data_dir}/{file_name}", tif_file_name)
-            create_arcgis_xml(args.granule, f"{tif_file_name}.xml", polarization)
-    cleanup(local_file)
+    if args.layover:
+        local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=SRTM 1Sec HGT", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
+        local_file = gpt(local_file, "Terrain-Correction", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", "-PdemName=SRTM 1Sec HGT")
+        process_img_files(local_file, 'LS.tif', create_xml=False, include_polarization=False)
+
+    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", cleanup_flag=True)
+    process_img_files(local_file, "RTC.tif")
+
