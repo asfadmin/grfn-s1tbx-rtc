@@ -24,15 +24,20 @@ COLLECTION_IDS = [
 USER_AGENT = "asfdaac/s1tbx-rtc"
 
 
-def process_img_files(local_file, extension, create_xml=True):
+def process_img_files(local_file, extension, create_xml=True, include_polarization=True):
     data_dir = local_file.replace(".dim", ".data")
     for file_name in os.listdir(data_dir):
         if file_name.endswith(".img"):
             polarization = file_name[-6:-4]
-            tif_file_name = f"/output/{args.granule}_{polarization}_{extension}"
+            if include_polarization:
+                tif_file_name = f"/output/{args.granule}_{polarization}_{extension}"
+            else:
+                tif_file_name = f"/output/{args.granule}_{extension}"
             create_geotiff_from_img(f"{data_dir}/{file_name}", tif_file_name)
             if create_xml:
                 create_arcgis_xml(args.granule, f"{tif_file_name}.xml", polarization)
+
+
     cleanup(local_file)
     return None
 
@@ -164,7 +169,7 @@ if __name__ == "__main__":
     if args.layover:
         local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=SRTM 1Sec HGT", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
         local_file = gpt(local_file, "Terrain-Correction", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", "-PdemName=SRTM 1Sec HGT")
-        process_img_files(local_file, 'LS.tif', create_xml=False)
+        process_img_files(local_file, 'LS.tif', create_xml=False, include_polarization=False)
 
     local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT", cleanup_flag=True)
 
