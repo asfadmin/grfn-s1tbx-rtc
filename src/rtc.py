@@ -39,7 +39,6 @@ def process_img_files(local_file, extension, create_xml=True, include_polarizati
             if create_xml and 'projectedLocalIncidenceAngle' not in file_name:
                 create_arcgis_xml(args.granule, f"{tif_file_name}.xml", polarization)
 
-
     cleanup(local_file)
     return None
 
@@ -78,8 +77,8 @@ def get_args():
     parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 granule name", required=True)
     parser.add_argument("--username", "-u", type=str, help="Earthdata login username", required=True)
     parser.add_argument("--password", "-p", type=str, help="Earthdata login password", required=True)
-    parser.add_argument("--layover", "-l", action='store_true', help="Include layover shadow mask in Ouput")
-    parser.add_argument("--incidence_angle", "-i", action='store_true', help="Include Incidence Angle in Ouput")
+    parser.add_argument("--layover", "-l", action='store_true', help="Include layover shadow mask in ouput")
+    parser.add_argument("--incidence_angle", "-i", action='store_true', help="Include incidence angle in ouput")
     args = parser.parse_args()
     return args
 
