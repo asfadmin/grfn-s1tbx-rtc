@@ -173,9 +173,8 @@ if __name__ == "__main__":
         local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=SRTM 1Sec HGT", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
         local_file = gpt(local_file, "Terrain-Correction", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", "-PdemName=SRTM 1Sec HGT")
         process_img_files(local_file, 'LS.tif', create_xml=False, include_polarization=False)
-    if args.incidenceangle:
-        local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT", "-PsaveProjectedLocalIncidenceAngle=true", cleanup_flag=True)
-    else:
-        local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT", cleanup_flag=True)
+    inc_angle = "true" if args.incidenceangle else inc_angle = "false"
+    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", cleanup_flag=True)
+
     process_img_files(local_file, "RTC.tif")
 
