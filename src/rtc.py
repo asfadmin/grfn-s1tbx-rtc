@@ -153,7 +153,7 @@ def create_arcgis_xml(input_granule, output_file, polarization):
 
 if __name__ == "__main__":
     args = get_args()
-    inc_angle = "true" if args.incidence_angle else inc_angle = "false"
+    inc_angle = "true" if args.incidence_angle else "false"
 
     print("\nFetching Granule Information")
     download_url = get_download_url(args.granule)
