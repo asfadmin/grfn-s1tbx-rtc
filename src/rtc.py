@@ -36,7 +36,7 @@ def process_img_files(local_file, extension, create_xml=True, include_polarizati
             if 'projectedLocalIncidenceAngle' in file_name:
                 tif_file_name = f"/output/{args.granule}_PIA.tif"
             create_geotiff_from_img(f"{data_dir}/{file_name}", tif_file_name)
-            if create_xml:
+            if create_xml and 'projectedLocalIncidenceAngle' not in file_name:
                 create_arcgis_xml(args.granule, f"{tif_file_name}.xml", polarization)
 
 
@@ -175,8 +175,8 @@ if __name__ == "__main__":
         process_img_files(local_file, 'LS.tif', create_xml=False, include_polarization=False)
     if args.incidenceangle:
         local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT", "-PsaveProjectedLocalIncidenceAngle=true", cleanup_flag=True)
-        process_img_files(local_file, "RTC.tif")
     else:
         local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT", cleanup_flag=True)
-        process_img_files(local_file, "RTC.tif")
+
+    process_img_files(local_file, "RTC.tif")
 
