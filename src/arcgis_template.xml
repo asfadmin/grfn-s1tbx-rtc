@@ -165,7 +165,8 @@ Additional information about Sentinel-1 data, imagery, tools and applications is
 4. Multi-look dataset. For GRD 30-meter product, 3 x 3 looks are used.
 5. Apply radiometric terrain flattening
 6. Apply terrain correction
-7. Post processing creates GeoTIFF files</statement>
+7. Optional: Create layover/shadow mask
+8. Post processing creates GeoTIFF files</statement>
     </dataLineage>
   </dqInfo>
   <mdMaint>
