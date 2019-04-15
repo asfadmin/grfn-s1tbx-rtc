@@ -154,7 +154,7 @@ def create_arcgis_xml(input_granule, output_file, polarization):
 def get_dem_file(bbox):
     temp_file = "temp_dem"
     final_file = "dem"
-    system_call(["python2.7", "/usr/local/etc/hyp3-lib/src/get_dem.py", bbox['lon_min'], bbox['lat_min'], bbox['lon_max'], bbox['lat_max'], temp_file, "--utm", "--posting", "30"])
+    system_call(["get_dem.py", bbox['lon_min'], bbox['lat_min'], bbox['lon_max'], bbox['lat_max'], temp_file, "--utm", "--posting", "30"])
     system_call(["gdal_translate", "-ot", "Int16", temp_file, final_file])
     cleanup(temp_file)
     cleanup("temp.vrt")
