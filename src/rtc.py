@@ -55,7 +55,7 @@ def download_file(url):
     return local_filename
 
 
-def get_download_url(granule):
+def get_metadata(granule):
     params = {
         "readable_granule_name": granule,
         "provider": "ASF",
@@ -64,6 +64,7 @@ def get_download_url(granule):
     response = requests.get(url=CMR_URL, params=params)
     response.raise_for_status()
     cmr_data = response.json()
+    # TODO add bbox to response in addition to download_url
     download_url = ""
     if cmr_data["feed"]["entry"]:
         for product in cmr_data["feed"]["entry"][0]["links"]:
@@ -150,31 +151,45 @@ def create_arcgis_xml(input_granule, output_file, polarization):
         f.write(pretty_printed)
 
 
+def get_dem_file(bbox):
+    temp_file = "temp_dem"
+    final_file = "dem"
+    system_call(["python2.7", "/usr/local/etc/hyp3-lib/src/get_dem.py", bbox['lon_min'], bbox['lat_min'], bbox['lon_max'], bbox['lat_max'], temp_file, "--utm", "--posting", "30"])
+    system_call(["gdal_translate", "-ot", "Int16", temp_file, final_file])
+    cleanup(temp_file)
+    cleanup("temp.vrt")
+    cleanup("temp_dem_wgs84.tif")
+    shutil.rmtree("DEM")
+    return final_file
+
+
 if __name__ == "__main__":
     args = get_args()
     inc_angle = "true" if args.incidence_angle else "false"
 
     print("\nFetching Granule Information")
-    download_url = get_download_url(args.granule)
-    if download_url is None:
+    metadata = get_metadata(args.granule)
+    if metadata is None:
         print(f"\nERROR: Either {args.granule} does exist or it is not a GRD product.")
         exit(1)
 
-    print(f"\nDownloading granule from {download_url}")
+    dem_file = get_dem_file(metadata['bbox'])
+
+    print(f"\nDownloading granule from {metadata['download_url']}")
     write_netrc_file(args.username, args.password)
-    local_file = download_file(download_url)
+    local_file = download_file(metadata['download_url'])
 
     local_file = gpt(local_file, "Apply-Orbit-File")
     local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
     local_file = gpt(local_file, "Speckle-Filter")
     local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
-    terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False")
+    terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
 
     if args.layover:
         local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=SRTM 1Sec HGT", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
-        local_file = gpt(local_file, "Terrain-Correction", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", "-PdemName=SRTM 1Sec HGT")
+        local_file = gpt(local_file, "Terrain-Correction", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
         process_img_files(local_file, 'LS.tif', create_xml=False, include_polarization=False)
 
-    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", cleanup_flag=True)
+    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
+    cleanup(dem_file)
     process_img_files(local_file, "RTC.tif")
-
