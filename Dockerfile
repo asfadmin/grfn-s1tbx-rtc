@@ -17,8 +17,7 @@ RUN apt-get update && \
     mkdir /output /root/.aws
 
 COPY gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
-ENV PATH=$PATH:/usr/local/snap/bin
-ENV PYTHONPATH=$PYTHONPATH:/usr/local/etc/hyp3-lib-0.8/src
+ENV PATH=$PATH:/usr/local/snap/bin:/usr/local/etc/hyp3-lib-0.8/src
 ENV HOME=/root
 WORKDIR $HOME
 COPY src $HOME
