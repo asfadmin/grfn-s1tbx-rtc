@@ -190,6 +190,6 @@ if __name__ == "__main__":
         local_file = gpt(local_file, "Terrain-Correction", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
         process_img_files(local_file, 'LS.tif', create_xml=False, include_polarization=False)
 
-    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
+    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
     cleanup(dem_file)
     process_img_files(local_file, "RTC.tif")
