@@ -26,19 +26,17 @@ COLLECTION_IDS = [
 USER_AGENT = "asfdaac/s1tbx-rtc"
 
 
-def process_img_files(dim_file, extension, create_xml=True, include_polarization=True):
+def process_img_files(dim_file):
     for img_file in get_img_files(dim_file):
-        polarization = img_file[-6:-4]
-        if include_polarization:
-            tif_file_name = f"/output/{args.granule}_{polarization}_{extension}"
-        else:
-            tif_file_name = f"/output/{args.granule}_{extension}"
         if 'projectedLocalIncidenceAngle' in img_file:
             tif_file_name = f"/output/{args.granule}_PIA.tif"
-        create_geotiff_from_img(img_file, tif_file_name)
-        if create_xml and 'projectedLocalIncidenceAngle' not in img_file:
+        elif 'layover_shadow_mask' in img_file:
+            tif_file_name = f"/output/{args.granule}_LS.tif"
+        else:
+            polarization = img_file[-6:-4]
+            tif_file_name = f"/output/{args.granule}_{polarization}_RTC.tif"
             create_arcgis_xml(args.granule, f"{tif_file_name}.xml", polarization)
-
+        create_geotiff_from_img(img_file, tif_file_name)
     cleanup(dim_file)
     return None
 
@@ -204,8 +202,8 @@ if __name__ == "__main__":
     if args.layover:
         local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=SRTM 1Sec HGT", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
         local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={utm_projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", "-PdemName=SRTM 1Sec HGT")
-        process_img_files(local_file, 'LS.tif', create_xml=False, include_polarization=False)
+        process_img_files(local_file)
 
     local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={utm_projection}", "-PdemName=SRTM 1Sec HGT", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", cleanup_flag=True)
-    process_img_files(local_file, "RTC.tif")
+    process_img_files(local_file)
 
