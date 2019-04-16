@@ -187,7 +187,7 @@ def get_dem_file(bbox):
     cleanup("tempdem.tif")
     cleanup("temputm.tif")
     cleanup("temp_dem_wgs84.tif")
-    shutil.rmtree("DEM")
+    rmtree("DEM")
     system_call(["gdal_translate", "-ot", "Int16", temp_file, final_file])
     cleanup(temp_file)
     return final_file
