@@ -44,7 +44,6 @@ def process_img_files(local_file, extension, create_xml=True, include_polarizati
     return None
 
 
-
 def download_file(url):
     local_filename = url.split("/")[-1]
     headers = {'User-Agent': USER_AGENT}
