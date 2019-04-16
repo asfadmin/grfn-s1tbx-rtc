@@ -35,7 +35,7 @@ def process_img_files(dim_file, extension, create_xml=True, include_polarization
             tif_file_name = f"/output/{args.granule}_{extension}"
         if 'projectedLocalIncidenceAngle' in img_file:
             tif_file_name = f"/output/{args.granule}_PIA.tif"
-        create_geotiff_from_img(f"{data_dir}/{img_file}", tif_file_name)
+        create_geotiff_from_img(img_file, tif_file_name)
         if create_xml and 'projectedLocalIncidenceAngle' not in img_file:
             create_arcgis_xml(args.granule, f"{tif_file_name}.xml", polarization)
 
@@ -118,7 +118,7 @@ def get_img_files(dim_file):
     data_dir = dim_file.replace('.dim', '.data')
     for file_name in os.listdir(data_dir):
         if file_name.endswith(".img"):
-            img_files.append(file_name)
+            img_files.append(f"{data_dir}/{file_name}")
     return img_files
 
 
