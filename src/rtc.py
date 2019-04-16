@@ -44,6 +44,7 @@ def process_img_files(local_file, extension, create_xml=True, include_polarizati
     return None
 
 
+
 def download_file(url):
     local_filename = url.split("/")[-1]
     headers = {'User-Agent': USER_AGENT}
@@ -139,6 +140,18 @@ def convert_wgs_to_utm(lon, lat):
     else:
         epsg_code = '327' + utm_band
     return f"EPSG:{epsg_code}"
+
+
+def get_center_point(file_name):
+    output = json.loads(subprocess.check_output(['gdalinfo', '-json', file_name]))
+    lon, lat = output['cornerCoordinates']['center']
+    return lon, lat
+
+
+def get_utm_projection(file_name):
+    lon, lat = get_center_point(file_name)
+    utm_projection = convert_wgs_to_utm(lon, lat)
+    return utm_projection
 
 
 def pretty_print_xml(content):
