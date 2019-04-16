@@ -139,15 +139,11 @@ def get_xml_template():
 
 
 def convert_wgs_to_utm(lon, lat):
-    utm_band = str((math.floor((lon + 180) / 6) % 60) + 1)
-    if len(utm_band) == 1:
-        utm_band = '0' + utm_band
+    utm_band = (math.floor((lon + 180) / 6) % 60) + 1
     if lat >= 0:
-        epsg_code = '326' + utm_band
+        return f"EPSG:326{utm_band:02}"
     else:
-        epsg_code = '327' + utm_band
-    return f"EPSG:{epsg_code}"
-
+        return f"EPSG:327{utm_band:02}"
 
 def get_center_point(file_name):
     output = json.loads(subprocess.check_output(['gdalinfo', '-json', file_name]))
