@@ -8,6 +8,7 @@ from shutil import rmtree
 from datetime import datetime
 from jinja2 import Template
 from lxml import etree
+from get_dem import get_dem
 
 CHUNK_SIZE = 5242880
 CMR_URL = "https://cmr.earthdata.nasa.gov/search/granules.json"
@@ -154,12 +155,14 @@ def create_arcgis_xml(input_granule, output_file, polarization):
 def get_dem_file(bbox):
     temp_file = "temp_dem"
     final_file = "dem"
-    system_call(["get_dem.py", bbox['lon_min'], bbox['lat_min'], bbox['lon_max'], bbox['lat_max'], temp_file, "--utm", "--posting", "30"])
-    system_call(["gdal_translate", "-ot", "Int16", temp_file, final_file])
-    cleanup(temp_file)
+    dem_name = get_dem(bbox['lon_min'], bbox['lat_min'], bbox['lon_max'], bbox['lat_max'], temp_file, True, 30)
     cleanup("temp.vrt")
+    cleanup("tempdem.tif")
+    cleanup("temputm.tif")
     cleanup("temp_dem_wgs84.tif")
     shutil.rmtree("DEM")
+    system_call(["gdal_translate", "-ot", "Int16", temp_file, final_file])
+    cleanup(temp_file)
     return final_file
 
 
