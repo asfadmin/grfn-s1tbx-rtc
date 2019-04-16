@@ -1,8 +1,10 @@
 #!/usr/local/bin/python
 
 import os
+import math
 import requests
 import subprocess
+import json
 from argparse import ArgumentParser
 from shutil import rmtree
 from datetime import datetime
@@ -24,22 +26,18 @@ COLLECTION_IDS = [
 USER_AGENT = "asfdaac/s1tbx-rtc"
 
 
-def process_img_files(local_file, extension, create_xml=True, include_polarization=True):
-    data_dir = local_file.replace(".dim", ".data")
-    for file_name in os.listdir(data_dir):
-        if file_name.endswith(".img"):
-            polarization = file_name[-6:-4]
-            if include_polarization:
-                tif_file_name = f"/output/{args.granule}_{polarization}_{extension}"
-            else:
-                tif_file_name = f"/output/{args.granule}_{extension}"
-            if 'projectedLocalIncidenceAngle' in file_name:
-                tif_file_name = f"/output/{args.granule}_PIA.tif"
-            create_geotiff_from_img(f"{data_dir}/{file_name}", tif_file_name)
-            if create_xml and 'projectedLocalIncidenceAngle' not in file_name:
-                create_arcgis_xml(args.granule, f"{tif_file_name}.xml", polarization)
-
-    cleanup(local_file)
+def process_img_files(dim_file):
+    for img_file in get_img_files(dim_file):
+        if 'projectedLocalIncidenceAngle' in img_file:
+            tif_file_name = f"/output/{args.granule}_PIA.tif"
+        elif 'layover_shadow_mask' in img_file:
+            tif_file_name = f"/output/{args.granule}_LS.tif"
+        else:
+            polarization = img_file[-6:-4]
+            tif_file_name = f"/output/{args.granule}_{polarization}_RTC.tif"
+            create_arcgis_xml(args.granule, f"{tif_file_name}.xml", polarization)
+        create_geotiff_from_img(img_file, tif_file_name)
+    cleanup(dim_file)
     return None
 
 
@@ -113,6 +111,15 @@ def gpt(input_file, command, *args, cleanup_flag=True):
     return f"{command}.dim"
 
 
+def get_img_files(dim_file):
+    img_files = []
+    data_dir = dim_file.replace('.dim', '.data')
+    for file_name in os.listdir(data_dir):
+        if file_name.endswith(".img"):
+            img_files.append(f"{data_dir}/{file_name}")
+    return img_files
+
+
 def create_geotiff_from_img(input_file, output_file):
     print(f"\nCreating {output_file}")
     temp_file = "temp.tif"
@@ -127,6 +134,26 @@ def get_xml_template():
         template_text = t.read()
     template = Template(template_text)
     return template
+
+
+def convert_wgs_to_utm(lon, lat):
+    utm_band = (math.floor((lon + 180) / 6) % 60) + 1
+    if lat >= 0:
+        return f"EPSG:326{utm_band:02}"
+    else:
+        return f"EPSG:327{utm_band:02}"
+
+def get_center_point(file_name):
+    output = json.loads(subprocess.check_output(['gdalinfo', '-json', file_name]))
+    lon, lat = output['cornerCoordinates']['center']
+    return lon, lat
+
+
+def get_utm_projection(dim_file):
+    img_file = get_img_files(dim_file)[0]
+    lon, lat = get_center_point(img_file)
+    utm_projection = convert_wgs_to_utm(lon, lat)
+    return utm_projection
 
 
 def pretty_print_xml(content):
@@ -170,11 +197,13 @@ if __name__ == "__main__":
     local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
     terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False")
 
+    utm_projection = get_utm_projection(terrain_flattening_file)
+
     if args.layover:
         local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=SRTM 1Sec HGT", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
-        local_file = gpt(local_file, "Terrain-Correction", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", "-PdemName=SRTM 1Sec HGT")
-        process_img_files(local_file, 'LS.tif', create_xml=False, include_polarization=False)
+        local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={utm_projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", "-PdemName=SRTM 1Sec HGT")
+        process_img_files(local_file)
 
-    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", "-PdemName=SRTM 1Sec HGT", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", cleanup_flag=True)
-    process_img_files(local_file, "RTC.tif")
+    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={utm_projection}", "-PdemName=SRTM 1Sec HGT", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", cleanup_flag=True)
+    process_img_files(local_file)
 
