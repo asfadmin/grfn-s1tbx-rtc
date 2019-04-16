@@ -138,7 +138,7 @@ def convert_wgs_to_utm(lon, lat):
         epsg_code = '326' + utm_band
     else:
         epsg_code = '327' + utm_band
-    return epsg_code
+    return f"EPSG:{epsg_code}"
 
 
 def pretty_print_xml(content):
