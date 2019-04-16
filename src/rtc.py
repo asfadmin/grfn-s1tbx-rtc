@@ -224,5 +224,3 @@ if __name__ == "__main__":
 
     local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={utm_projection}", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
     process_img_files(local_file)
-
->>>>>>> master
