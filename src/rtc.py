@@ -26,22 +26,20 @@ COLLECTION_IDS = [
 USER_AGENT = "asfdaac/s1tbx-rtc"
 
 
-def process_img_files(local_file, extension, create_xml=True, include_polarization=True):
-    data_dir = local_file.replace(".dim", ".data")
-    for file_name in os.listdir(data_dir):
-        if file_name.endswith(".img"):
-            polarization = file_name[-6:-4]
-            if include_polarization:
-                tif_file_name = f"/output/{args.granule}_{polarization}_{extension}"
-            else:
-                tif_file_name = f"/output/{args.granule}_{extension}"
-            if 'projectedLocalIncidenceAngle' in file_name:
-                tif_file_name = f"/output/{args.granule}_PIA.tif"
-            create_geotiff_from_img(f"{data_dir}/{file_name}", tif_file_name)
-            if create_xml and 'projectedLocalIncidenceAngle' not in file_name:
-                create_arcgis_xml(args.granule, f"{tif_file_name}.xml", polarization)
+def process_img_files(dim_file, extension, create_xml=True, include_polarization=True):
+    for img_file in get_img_files(dim_file):
+        polarization = img_file[-6:-4]
+        if include_polarization:
+            tif_file_name = f"/output/{args.granule}_{polarization}_{extension}"
+        else:
+            tif_file_name = f"/output/{args.granule}_{extension}"
+        if 'projectedLocalIncidenceAngle' in img_file:
+            tif_file_name = f"/output/{args.granule}_PIA.tif"
+        create_geotiff_from_img(f"{data_dir}/{img_file}", tif_file_name)
+        if create_xml and 'projectedLocalIncidenceAngle' not in img_file:
+            create_arcgis_xml(args.granule, f"{tif_file_name}.xml", polarization)
 
-    cleanup(local_file)
+    cleanup(dim_file)
     return None
 
 
@@ -115,6 +113,14 @@ def gpt(input_file, command, *args, cleanup_flag=True):
     return f"{command}.dim"
 
 
+def get_img_files(dim_file):
+    img_files = []
+    data_dir = dim_file.replace('.dim', '.data')
+    for file_name in os.listdir(data_dir):
+        if file_name.endswith(".img"):
+            img_files.append(file_name)
+    return img_files
+
 def create_geotiff_from_img(input_file, output_file):
     print(f"\nCreating {output_file}")
     temp_file = "temp.tif"
@@ -148,8 +154,9 @@ def get_center_point(file_name):
     return lon, lat
 
 
-def get_utm_projection(file_name):
-    lon, lat = get_center_point(file_name)
+def get_utm_projection(dim_file):
+    img_file = get_img_files(dim_file)[0]
+    lon, lat = get_center_point(img_file)
     utm_projection = convert_wgs_to_utm(lon, lat)
     return utm_projection
 
