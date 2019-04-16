@@ -1,6 +1,7 @@
 #!/usr/local/bin/python
 
 import os
+import math
 import requests
 import subprocess
 from argparse import ArgumentParser
@@ -127,6 +128,17 @@ def get_xml_template():
         template_text = t.read()
     template = Template(template_text)
     return template
+
+
+def convert_wgs_to_utm(lon, lat):
+    utm_band = str((math.floor((lon + 180) / 6) % 60) + 1)
+    if len(utm_band) == 1:
+        utm_band = '0' + utm_band
+    if lat >= 0:
+        epsg_code = '326' + utm_band
+    else:
+        epsg_code = '327' + utm_band
+    return epsg_code
 
 
 def pretty_print_xml(content):
