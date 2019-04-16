@@ -121,6 +121,7 @@ def get_img_files(dim_file):
             img_files.append(file_name)
     return img_files
 
+
 def create_geotiff_from_img(input_file, output_file):
     print(f"\nCreating {output_file}")
     temp_file = "temp.tif"
