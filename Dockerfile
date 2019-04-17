@@ -12,7 +12,7 @@ RUN apt-get update && \
     rm /usr/local/etc/esa-snap_sentinel_unix_6_0.sh && \
     pip3 install requests jinja2 lxml boto3 && \
     git clone --single-branch --branch python3 https://github.com/asfadmin/hyp3-lib.git /usr/local/etc/hyp3-lib && \
-    mkdir /output /root/.aws
+    mkdir /output
 
 COPY gpt.vmoptions /usr/local/snap/bin/gpt.vmoptions
 ENV PATH=$PATH:/usr/local/snap/bin
@@ -21,6 +21,5 @@ ENV HOME=/root
 WORKDIR $HOME
 COPY src $HOME
 COPY get_dem.py.cfg /usr/local/etc/hyp3-lib/config/get_dem.py.cfg
-COPY credentials /root/.aws/credentials
 
 ENTRYPOINT ["python3", "-u", "rtc.py"]
