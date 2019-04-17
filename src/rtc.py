@@ -181,16 +181,15 @@ def create_arcgis_xml(input_granule, output_file, polarization):
 
 def get_dem_file(bbox):
     temp_file = "temp_dem"
-    final_file = "dem"
     dem_name = get_dem(bbox['lon_min'], bbox['lat_min'], bbox['lon_max'], bbox['lat_max'], temp_file, True, 30)
     cleanup("temp.vrt")
     cleanup("tempdem.tif")
     cleanup("temputm.tif")
     cleanup("temp_dem_wgs84.tif")
     rmtree("DEM")
-    system_call(["gdal_translate", "-ot", "Int16", temp_file, final_file])
+    system_call(["gdal_translate", "-ot", "Int16", temp_file, dem_name])
     cleanup(temp_file)
-    return final_file
+    return dem_name
 
 
 if __name__ == "__main__":
