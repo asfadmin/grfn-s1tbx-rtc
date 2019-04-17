@@ -27,6 +27,22 @@ COLLECTION_IDS = [
 USER_AGENT = "asfdaac/s1tbx-rtc"
 
 
+def get_bounding_box(metadata):
+    #TODO GET POLY FROM METADATA AND MAKE IT USEFUL
+
+    max_lon = max(ul[0], ll[0], ur[0], lr[0])
+    min_lon = min(ul[0], ll[0], ur[0], lr[0])
+    max_lat = max(ul[1], ll[1], ur[1], lr[1])
+    min_lat = min(ul[1], ll[1], ur[1], lr[1])
+    bounding_box = {
+        "max_lon": max_lon,
+        "max_lat": max_lat,
+        "min_lon": min_lon,
+        "min_lat": min_lat
+    }
+
+    return bounding_box
+
 def process_img_files(dim_file):
     for img_file in get_img_files(dim_file):
         if 'projectedLocalIncidenceAngle' in img_file:
@@ -63,10 +79,13 @@ def get_metadata(granule):
     response = requests.get(url=CMR_URL, params=params)
     response.raise_for_status()
     cmr_data = response.json()
-    # TODO add bbox to response in addition to download_url
-    download_url = ""
     if cmr_data["feed"]["entry"]:
-        for product in cmr_data["feed"]["entry"][0]["links"]:
+        return cmr_data["feed"]["entry"][0]
+    return None
+
+
+def get_download_url(metadata):
+    for product in metadata["links"]:
             if "data" in product["rel"]:
                 return product["href"]
     return None
@@ -202,11 +221,12 @@ if __name__ == "__main__":
         print(f"\nERROR: Either {args.granule} does exist or it is not a GRD product.")
         exit(1)
 
-    dem_file = get_dem_file(metadata['bbox'])
-
-    print(f"\nDownloading granule from {metadata['download_url']}")
+    bbox = get_bounding_box(metadata)
+    dem_file = get_dem_file(bbox)
+    download_url = get_download_url(metadata)
+    print(f"\nDownloading granule from {download_url}")
     write_netrc_file(args.username, args.password)
-    local_file = download_file(metadata['download_url'])
+    local_file = download_file(download_url)
 
     local_file = gpt(local_file, "Apply-Orbit-File")
     local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
@@ -223,3 +243,4 @@ if __name__ == "__main__":
 
     local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={utm_projection}", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
     process_img_files(local_file)
+
