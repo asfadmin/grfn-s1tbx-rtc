@@ -224,18 +224,20 @@ if __name__ == "__main__":
         print(f"\nERROR: Either {args.granule} does exist or it is not a GRD product.")
         exit(1)
 
-    dem_file = get_dem_file(metadata)
-    download_url = get_download_url(metadata)
-    utm_projection = get_utm_projection(metadata)
-
-    print(f"\nDownloading granule from {download_url}")
     write_netrc_file(args.username, args.password)
+    download_url = get_download_url(metadata)
+    print(f"\nDownloading granule from {download_url}")
     local_file = download_file(download_url)
 
     local_file = gpt(local_file, "Apply-Orbit-File")
     local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
     local_file = gpt(local_file, "Speckle-Filter")
     local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
+
+    print("\nPreparing Digital Elevation Model")
+    dem_file = get_dem_file(metadata)
+    utm_projection = get_utm_projection(metadata)
+
     terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
 
     if args.layover:
@@ -244,5 +246,5 @@ if __name__ == "__main__":
         process_img_files(local_file)
 
     local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={utm_projection}", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
+    cleanup(dem_file)
     process_img_files(local_file)
-
