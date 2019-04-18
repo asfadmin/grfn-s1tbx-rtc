@@ -10,6 +10,7 @@ from shutil import rmtree
 from datetime import datetime
 from jinja2 import Template
 from lxml import etree
+from shapely.geometry import Polygon
 from get_dem import get_dem
 
 CHUNK_SIZE = 5242880
@@ -26,22 +27,6 @@ COLLECTION_IDS = [
 ]
 USER_AGENT = "asfdaac/s1tbx-rtc"
 
-
-def get_bounding_box(metadata):
-    #TODO GET POLY FROM METADATA AND MAKE IT USEFUL
-
-    max_lon = max(ul[0], ll[0], ur[0], lr[0])
-    min_lon = min(ul[0], ll[0], ur[0], lr[0])
-    max_lat = max(ul[1], ll[1], ur[1], lr[1])
-    min_lat = min(ul[1], ll[1], ur[1], lr[1])
-    bounding_box = {
-        "max_lon": max_lon,
-        "max_lat": max_lat,
-        "min_lon": min_lon,
-        "min_lat": min_lat
-    }
-
-    return bounding_box
 
 def process_img_files(dim_file):
     for img_file in get_img_files(dim_file):
@@ -164,16 +149,33 @@ def convert_wgs_to_utm(lon, lat):
     else:
         return f"EPSG:327{utm_band:02}"
 
-def get_center_point(file_name):
-    output = json.loads(subprocess.check_output(['gdalinfo', '-json', file_name]))
-    lon, lat = output['cornerCoordinates']['center']
-    return lon, lat
+
+def get_polygon(cmr_polygon_string):
+    floats = [float(ii) for ii in cmr_polygon_string.split()]
+    points = zip(floats[::2], floats[1::2])
+    polygon = Polygon(points)
+    return polygon
 
 
-def get_utm_projection(dim_file):
-    img_file = get_img_files(dim_file)[0]
-    lon, lat = get_center_point(img_file)
-    utm_projection = convert_wgs_to_utm(lon, lat)
+def get_bbox(cmr_polygon_string):
+    poly = get_polygon(cmr_polygon_string)
+    bounds = poly.bounds
+    return {
+        "lat_min": bounds[0],
+        "lon_min": bounds[1],
+        "lat_max": bounds[2],
+        "lon_max": bounds[3],
+    }
+
+
+def get_centroid(cmr_polygon_string):
+    poly = get_polygon(cmr_polygon_string)
+    return poly.centroid.coords[0]
+
+
+def get_utm_projection(metadata):
+    centroid = get_centroid(metadata['polygons'][0][0])
+    utm_projection = convert_wgs_to_utm(centroid[1], centroid[0])
     return utm_projection
 
 
@@ -198,7 +200,8 @@ def create_arcgis_xml(input_granule, output_file, polarization):
         f.write(pretty_printed)
 
 
-def get_dem_file(bbox):
+def get_dem_file(metadata):
+    bbox = get_bbox(metadata['polygons'][0][0])
     temp_file = "temp_dem"
     dem_name = get_dem(bbox['lon_min'], bbox['lat_min'], bbox['lon_max'], bbox['lat_max'], temp_file, True, 30)
     cleanup("temp.vrt")
@@ -221,9 +224,10 @@ if __name__ == "__main__":
         print(f"\nERROR: Either {args.granule} does exist or it is not a GRD product.")
         exit(1)
 
-    bbox = get_bounding_box(metadata)
-    dem_file = get_dem_file(bbox)
+    dem_file = get_dem_file(metadata)
     download_url = get_download_url(metadata)
+    utm_projection = get_utm_projection(metadata)
+
     print(f"\nDownloading granule from {download_url}")
     write_netrc_file(args.username, args.password)
     local_file = download_file(download_url)
@@ -233,8 +237,6 @@ if __name__ == "__main__":
     local_file = gpt(local_file, "Speckle-Filter")
     local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
     terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
-
-    utm_projection = get_utm_projection(terrain_flattening_file)
 
     if args.layover:
         local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=SRTM 1Sec HGT", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
