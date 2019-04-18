@@ -7,8 +7,6 @@ import subprocess
 from argparse import ArgumentParser
 from shutil import rmtree
 from datetime import datetime
-from functools import wraps
-from time import time
 
 # pip3 install
 import requests
@@ -32,18 +30,6 @@ COLLECTION_IDS = [
 USER_AGENT = "asfdaac/s1tbx-rtc"
 
 
-def timeit(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        start = time()
-        result = f(*args, **kwargs)
-        end = time()
-        diff = end - start
-        print(f"Elapsed time for function {f.__name__}: {diff}")
-        return result
-    return wrapper
-
-
 def get_args():
     parser = ArgumentParser(description="Radiometric Terrain Correction using the SENTINEL-1 Toolbox")
     parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 granule name", required=True)
@@ -52,7 +38,6 @@ def get_args():
     parser.add_argument("--layover", "-l", action='store_true', help="Include layover shadow mask in ouput")
     parser.add_argument("--incidence_angle", "-i", action='store_true', help="Include incidence angle in ouput")
     return parser.parse_args()
-
 
 # Metadata
 def get_download_url(entry):
@@ -103,13 +88,11 @@ def get_metadata(granule):
         }
     return None
 
-
 # Write a netrc file
 def write_netrc_file(username, password):
     netrc_file = os.environ["HOME"] + "/.netrc"
     with open(netrc_file, "w") as f:
         f.write(f"machine urs.earthdata.nasa.gov login {username} password {password}")
-
 
 # Download the granule file
 def download_file(url):
@@ -122,7 +105,6 @@ def download_file(url):
                 if chunk:
                     f.write(chunk)
     return local_filename
-
 
 # Get the DEM
 def get_dem_file(bbox):
@@ -137,7 +119,6 @@ def get_dem_file(bbox):
     cleanup(temp_file)
     return dem_name
 
-
 # XML
 def get_xml_template():
     with open('arcgis_template.xml', 'r') as t:
@@ -145,13 +126,11 @@ def get_xml_template():
     template = Template(template_text)
     return template
 
-
 def pretty_print_xml(content):
     parser = etree.XMLParser(remove_blank_text=True)
     root = etree.fromstring(content, parser)
     pretty_printed = etree.tostring(root, pretty_print=True)
     return pretty_printed
-
 
 def create_arcgis_xml(input_granule, output_file, polarization):
     template = get_xml_template()
@@ -165,7 +144,6 @@ def create_arcgis_xml(input_granule, output_file, polarization):
     pretty_printed = pretty_print_xml(rendered)
     with open(output_file, 'wb') as f:
         f.write(pretty_printed)
-
 
 # Process images
 def create_geotiff_from_img(input_file, output_file):
@@ -198,7 +176,6 @@ def process_img_files(args, dim_file):
     cleanup(dim_file)
     return None
 
-
 # Code used a little everywhere
 def system_call(params):
     print(' '.join(params))
@@ -207,13 +184,11 @@ def system_call(params):
         exit(return_code)
     return None
 
-
 def cleanup(input_file):
     os.unlink(input_file)
     if input_file.endswith(".dim"):
         data_dir = input_file.replace(".dim", ".data")
         rmtree(data_dir)
-
 
 def gpt(input_file, command, *args, cleanup_flag=True):
     print(f"\n{command}")
@@ -223,9 +198,7 @@ def gpt(input_file, command, *args, cleanup_flag=True):
         cleanup(input_file)
     return f"{command}.dim"
 
-
 # General Functions
-@timeit
 def fetch_metdata(args):
     print("\nFetching Granule Information")
     metadata = get_metadata(args.granule)
@@ -234,22 +207,6 @@ def fetch_metdata(args):
         exit(1)
     return metadata
 
-@timeit
-def write_netrc(args):
-    print("\nWriting .netrc File")
-    write_netrc_file(args.username, args.password)
-
-@timeit
-def prepare_dem(bbox):
-    print("\nPreparing Digital Elevation Model")
-    return get_dem_file(bbox)
-
-@timeit
-def download_granule(url):
-    print(f"\nDownloading Granule from {url}")
-    return download_file(url)
-
-@timeit
 def processing_granule(args, local_file, dem_file):
     print("\nProcessing Granule")
     local_file = gpt(local_file, "Apply-Orbit-File")
@@ -271,13 +228,19 @@ def processing_granule(args, local_file, dem_file):
     process_img_files(args, local_file)
 
 # Main
-@timeit
 def main():
     args = get_args()
     metadata = fetch_metdata(args)
-    write_netrc(args)
-    dem_file = prepare_dem(metadata['bbox'])
-    local_file = download_granule(metadata['download_url'])
+
+    print("\nWriting .netrc File")
+    write_netrc_file(args.username, args.password)
+
+    print("\nPreparing Digital Elevation Model")
+    dem_file = get_dem_file(metadata['bbox'])
+
+    print(f"\nDownloading Granule from {metadata['download_url']}")
+    local_file = download_file(metadata['download_url'])
+
     processing_granule(args, local_file, dem_file)
 
 
