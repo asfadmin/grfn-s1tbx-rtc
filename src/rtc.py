@@ -250,7 +250,7 @@ def download_granule(url):
     return download_file(url)
 
 @timeit
-def processing_granule(args, local_file, dem_file):
+def processing_granule(args, local_file, dem_file, utm_projection):
     print("\nProcessing Granule")
     local_file = gpt(local_file, "Apply-Orbit-File")
     local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
@@ -260,12 +260,12 @@ def processing_granule(args, local_file, dem_file):
 
     if args.layover:
         local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
-        local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={metadata['utm_projection']}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
+        local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={utm_projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
                          "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
         process_img_files(args, local_file)
 
     inc_angle = "true" if args.incidence_angle else "false"
-    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={metadata['utm_projection']}", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", "-PdemName=External DEM",
+    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={utm_projection}", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", "-PdemName=External DEM",
                      f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
     cleanup(dem_file)
     process_img_files(args, local_file)
@@ -278,7 +278,7 @@ def main():
     write_netrc(args)
     dem_file = prepare_dem(metadata['bbox'])
     local_file = download_granule(metadata['download_url'])
-    processing_granule(args, local_file, dem_file)
+    processing_granule(args, local_file, dem_file, metadata['utm_projection'])
 
 
 if __name__ == "__main__":
