@@ -29,16 +29,6 @@ COLLECTION_IDS = [
 ]
 USER_AGENT = "asfdaac/s1tbx-rtc"
 
-
-def get_args():
-    parser = ArgumentParser(description="Radiometric Terrain Correction using the SENTINEL-1 Toolbox")
-    parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 granule name", required=True)
-    parser.add_argument("--username", "-u", type=str, help="Earthdata login username", required=True)
-    parser.add_argument("--password", "-p", type=str, help="Earthdata login password", required=True)
-    parser.add_argument("--layover", "-l", action='store_true', help="Include layover shadow mask in ouput")
-    parser.add_argument("--incidence_angle", "-i", action='store_true', help="Include incidence angle in ouput")
-    return parser.parse_args()
-
 # Metadata
 def get_download_url(entry):
     for product in entry["links"]:
