@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/local/bin/python3
 
 # Standard libraries
 import os
@@ -176,6 +176,25 @@ def process_img_files(args, dim_file):
     cleanup(dim_file)
     return None
 
+def processing_granule(args, local_file, dem_file, utm_projection):
+    local_file = gpt(local_file, "Apply-Orbit-File")
+    local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
+    local_file = gpt(local_file, "Speckle-Filter")
+    local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
+    terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
+
+    if args.layover:
+        local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
+        local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={utm_projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
+                         "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
+        process_img_files(args, local_file)
+
+    inc_angle = "true" if args.incidence_angle else "false"
+    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={utm_projection}", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", "-PdemName=External DEM",
+                     f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
+    cleanup(dem_file)
+    process_img_files(args, local_file)
+
 # Code used a little everywhere
 def system_call(params):
     print(' '.join(params))
@@ -198,39 +217,20 @@ def gpt(input_file, command, *args, cleanup_flag=True):
         cleanup(input_file)
     return f"{command}.dim"
 
-# General Functions
-def fetch_metdata(args):
+if __name__ == "__main__":
+    parser = ArgumentParser(description="Radiometric Terrain Correction using the SENTINEL-1 Toolbox")
+    parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 granule name", required=True)
+    parser.add_argument("--username", "-u", type=str, help="Earthdata login username", required=True)
+    parser.add_argument("--password", "-p", type=str, help="Earthdata login password", required=True)
+    parser.add_argument("--layover", "-l", action='store_true', help="Include layover shadow mask in ouput")
+    parser.add_argument("--incidence_angle", "-i", action='store_true', help="Include incidence angle in ouput")
+    args = parser.parse_args()
+
     print("\nFetching Granule Information")
     metadata = get_metadata(args.granule)
     if metadata is None:
         print(f"\nERROR: Either {args.granule} does exist or it is not a GRD product.")
         exit(1)
-    return metadata
-
-def processing_granule(args, local_file, dem_file):
-    print("\nProcessing Granule")
-    local_file = gpt(local_file, "Apply-Orbit-File")
-    local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
-    local_file = gpt(local_file, "Speckle-Filter")
-    local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
-    terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
-
-    if args.layover:
-        local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
-        local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={metadata['utm_projection']}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
-                         "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
-        process_img_files(args, local_file)
-
-    inc_angle = "true" if args.incidence_angle else "false"
-    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={metadata['utm_projection']}", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", "-PdemName=External DEM",
-                     f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
-    cleanup(dem_file)
-    process_img_files(args, local_file)
-
-# Main
-def main():
-    args = get_args()
-    metadata = fetch_metdata(args)
 
     print("\nWriting .netrc File")
     write_netrc_file(args.username, args.password)
@@ -241,8 +241,5 @@ def main():
     print(f"\nDownloading Granule from {metadata['download_url']}")
     local_file = download_file(metadata['download_url'])
 
-    processing_granule(args, local_file, dem_file)
-
-
-if __name__ == "__main__":
-    main()
+    print("\nProcessing Granule")
+    processing_granule(args, local_file, dem_file, metadata['utm_projection'])
