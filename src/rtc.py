@@ -152,38 +152,37 @@ def get_img_files(dim_file):
             img_files.append(f"{data_dir}/{file_name}")
     return img_files
 
-def process_img_files(args, dim_file):
+def process_img_files(granule, dim_file):
     for img_file in get_img_files(dim_file):
         if 'projectedLocalIncidenceAngle' in img_file:
-            tif_file_name = f"/output/{args.granule}_PIA.tif"
+            tif_file_name = f"/output/{granule}_PIA.tif"
         elif 'layover_shadow_mask' in img_file:
-            tif_file_name = f"/output/{args.granule}_LS.tif"
+            tif_file_name = f"/output/{granule}_LS.tif"
         else:
             polarization = img_file[-6:-4]
-            tif_file_name = f"/output/{args.granule}_{polarization}_RTC.tif"
-            create_arcgis_xml(args.granule, f"{tif_file_name}.xml", polarization)
+            tif_file_name = f"/output/{granule}_{polarization}_RTC.tif"
+            create_arcgis_xml(granule, f"{tif_file_name}.xml", polarization)
         create_geotiff_from_img(img_file, tif_file_name)
     cleanup(dim_file)
     return None
 
-def processing_granule(args, local_file, dem_file, utm_projection):
+def processing_granule(granule, has_incidence_angle, has_layover, local_file, dem_file, utm_projection):
     local_file = gpt(local_file, "Apply-Orbit-File")
     local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
     local_file = gpt(local_file, "Speckle-Filter")
     local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
     terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
 
-    if args.layover:
+    if has_layover:
         local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
         local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={utm_projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
                          "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
-        process_img_files(args, local_file)
+        process_img_files(granule, local_file)
 
-    inc_angle = "true" if args.incidence_angle else "false"
-    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={utm_projection}", f"-PsaveProjectedLocalIncidenceAngle={inc_angle}", "-PdemName=External DEM",
+    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={utm_projection}", f"-PsaveProjectedLocalIncidenceAngle={has_incidence_angle}", "-PdemName=External DEM",
                      f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
     cleanup(dem_file)
-    process_img_files(args, local_file)
+    process_img_files(granule, local_file)
 
 # Code used a little everywhere
 def system_call(params):
@@ -212,8 +211,8 @@ if __name__ == "__main__":
     parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 granule name", required=True)
     parser.add_argument("--username", "-u", type=str, help="Earthdata login username", required=True)
     parser.add_argument("--password", "-p", type=str, help="Earthdata login password", required=True)
-    parser.add_argument("--layover", "-l", action='store_true', help="Include layover shadow mask in ouput")
-    parser.add_argument("--incidence_angle", "-i", action='store_true', help="Include incidence angle in ouput")
+    parser.add_argument("--layover", "-l", dest="has_layover", action='store_true', help="Include layover shadow mask in ouput")
+    parser.add_argument("--incidence_angle", "-i", dest="has_incidence_angle", action='store_true', help="Include incidence angle in ouput")
     args = parser.parse_args()
 
     print("\nFetching Granule Information")
@@ -232,4 +231,4 @@ if __name__ == "__main__":
     local_file = download_file(metadata['download_url'])
 
     print("\nProcessing Granule")
-    processing_granule(args, local_file, dem_file, metadata['utm_projection'])
+    processing_granule(args.granule, args.has_incidence_angle, args.has_layover, local_file, dem_file, metadata['utm_projection'])
