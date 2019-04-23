@@ -2,7 +2,7 @@
 
 import numpy, sys
 from osgeo import gdal
-from osgeo.gdalconst import *
+from osgeo.gdalconst import GDT_Float32
 
 
 def remove_small_raster_values(input_file, output_file, tolerance=0.003811):
