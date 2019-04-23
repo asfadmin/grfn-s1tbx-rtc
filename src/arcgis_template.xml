@@ -36,7 +36,7 @@
   </Esri>
   <dataIdInfo>
     <idPurp>This file is a Radiometric Terrain Corrected granule of GRD SAR data from the Sentinel-1 mission, processed using S1TBX software. Cell values indicate {{ polarization }} gamma-0 power, and pixel spacing is 30m.</idPurp>
-    <idAbs>This Radiometric Terrain Corrected (RTC) product is derived from a Ground Range Detected (GRD) granule of Synthetic Aperture Radar data from the Copernicus Sentinel-1 mission (European Space Agency), generated using Sentinel-1 Toolbox (S1TBX) release 6.0. It is projected to WGS 84 Universal Transverse Mercator (UTM) coordinates, and is corrected for terrain using a digital elevation model (DEM). The DEM used for this product is SRTMGL1 (about 30m resolution).
+    <idAbs>This Radiometric Terrain Corrected (RTC) product is derived from a Ground Range Detected (GRD) granule of Synthetic Aperture Radar data from the Copernicus Sentinel-1 mission (European Space Agency), generated using Sentinel-1 Toolbox (S1TBX) release 6.0. It is projected to WGS 84 Universal Transverse Mercator (UTM) coordinates, and is corrected for terrain using a digital elevation model (DEM). The DEM used for this product is {{ dem_name }} (about {{ dem_resolution }} resolution).
 
 Processing Date/Time: {{ date }} {{ time }} UTC
 
