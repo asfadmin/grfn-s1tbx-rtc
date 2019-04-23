@@ -123,6 +123,16 @@ def pretty_print_xml(content):
     pretty_printed = etree.tostring(root, pretty_print=True)
     return pretty_printed
 
+def get_dem_resolution(dem_name):
+    dem_resolutions = {
+        'NED13': '10m',
+        'NED1': '30m',
+        'NED2': '60m',
+        'SRTMGL1': '30m',
+        'SRTMGL3': '90m',
+    }
+    return dem_resolutions[dem_name]
+
 def create_arcgis_xml(input_granule, output_file, polarization, dem_name):
     template = get_xml_template()
     data = {
@@ -131,6 +141,7 @@ def create_arcgis_xml(input_granule, output_file, polarization, dem_name):
         'input_granule': input_granule,
         'acquisition_year': input_granule[17:21],
         'dem_name': dem_name,
+        'dem_resolution': get_dem_resolution(dem_name),
     }
     rendered = template.render(data)
     pretty_printed = pretty_print_xml(rendered)
