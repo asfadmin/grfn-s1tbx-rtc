@@ -103,7 +103,8 @@ def get_dem_file(bbox):
     cleanup("temp.vrt")
     cleanup("tempdem.tif")
     cleanup("temputm.tif")
-    cleanup("temp_dem_wgs84.tif")
+    if "NED" in dem_name:
+        cleanup("temp_dem_wgs84.tif")
     rmtree("DEM")
     system_call(["gdal_translate", "-ot", "Int16", temp_file, dem_name])
     cleanup(temp_file)
@@ -122,13 +123,14 @@ def pretty_print_xml(content):
     pretty_printed = etree.tostring(root, pretty_print=True)
     return pretty_printed
 
-def create_arcgis_xml(input_granule, output_file, polarization):
+def create_arcgis_xml(input_granule, output_file, polarization, dem_name):
     template = get_xml_template()
     data = {
         'now': datetime.utcnow(),
         'polarization': polarization,
         'input_granule': input_granule,
         'acquisition_year': input_granule[17:21],
+        'dem_name': dem_name,
     }
     rendered = template.render(data)
     pretty_printed = pretty_print_xml(rendered)
@@ -152,7 +154,7 @@ def get_img_files(dim_file):
             img_files.append(f"{data_dir}/{file_name}")
     return img_files
 
-def process_img_files(granule, dim_file):
+def process_img_files(granule, dim_file, dem_name=None):
     for img_file in get_img_files(dim_file):
         if 'projectedLocalIncidenceAngle' in img_file:
             tif_file_name = f"/output/{granule}_PIA.tif"
@@ -161,7 +163,7 @@ def process_img_files(granule, dim_file):
         else:
             polarization = img_file[-6:-4]
             tif_file_name = f"/output/{granule}_{polarization}_RTC.tif"
-            create_arcgis_xml(granule, f"{tif_file_name}.xml", polarization)
+            create_arcgis_xml(granule, f"{tif_file_name}.xml", polarization, dem_name)
         create_geotiff_from_img(img_file, tif_file_name)
     cleanup(dim_file)
     return None
@@ -182,7 +184,7 @@ def processing_granule(granule, has_incidence_angle, has_layover, local_file, de
     local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={utm_projection}", f"-PsaveProjectedLocalIncidenceAngle={has_incidence_angle}", "-PdemName=External DEM",
                      f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
     cleanup(dem_file)
-    process_img_files(granule, local_file)
+    process_img_files(granule, local_file, dem_file)
 
 # Code used a little everywhere
 def system_call(params):
