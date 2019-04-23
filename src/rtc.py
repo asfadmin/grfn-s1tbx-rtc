@@ -13,7 +13,6 @@ import requests
 from shapely.geometry import Polygon
 from jinja2 import Template
 from lxml import etree
-from rtc_utils import remove_small_raster_values
 from get_dem import get_dem
 
 CHUNK_SIZE = 5242880
