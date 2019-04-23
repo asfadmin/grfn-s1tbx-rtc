@@ -173,7 +173,7 @@ def create_geotiff_from_img(input_file, output_file):
     temp_file = "temp.tif"
     cleaned_file = "cleaned.tif"
     system_call(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", input_file, temp_file])
-    remove_small_raster_values(temp_file, cleaned_file)
+    system_call(["gdal_calc.py", "-A", temp_file, f"--outfile={cleaned_file}", "--calc=A*(A>.0002)", "--NoDataValue=0"])
     cleanup(temp_file)
     system_call(["gdaladdo", "-r", "average", cleaned_file, "2", "4", "8", "16"])
     system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", cleaned_file, output_file])

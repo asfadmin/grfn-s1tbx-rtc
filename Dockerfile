@@ -6,7 +6,7 @@ RUN apt-get update && \
     apt-get install -y software-properties-common python3 python3-pip git wget && \
     add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable && \
     apt-get update && \
-    apt-get install -y gdal-bin python3-gdal && \
+    apt-get install -y gdal-bin python-gdal python3-gdal && \
     wget --no-verbose --directory-prefix=/usr/local/etc/ http://step.esa.int/downloads/6.0/installers/esa-snap_sentinel_unix_6_0.sh && \
     sh /usr/local/etc/esa-snap_sentinel_unix_6_0.sh -q -varfile /usr/local/etc/snap_install.varfile && \
     rm /usr/local/etc/esa-snap_sentinel_unix_6_0.sh && \
