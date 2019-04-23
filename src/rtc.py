@@ -13,6 +13,7 @@ import requests
 from shapely.geometry import Polygon
 from jinja2 import Template
 from lxml import etree
+from rtc_utils import remove_small_raster_values
 from get_dem import get_dem
 
 CHUNK_SIZE = 5242880
@@ -170,10 +171,13 @@ def create_arcgis_xml(input_granule, output_file, polarization, dem_name):
 def create_geotiff_from_img(input_file, output_file):
     print(f"\nCreating {output_file}")
     temp_file = "temp.tif"
+    cleaned_file = "cleaned.tif"
     system_call(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", input_file, temp_file])
-    system_call(["gdaladdo", "-r", "average", temp_file, "2", "4", "8", "16"])
-    system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file, output_file])
+    remove_small_raster_values(temp_file, cleaned_file)
     cleanup(temp_file)
+    system_call(["gdaladdo", "-r", "average", cleaned_file, "2", "4", "8", "16"])
+    system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", cleaned_file, output_file])
+    cleanup(cleaned_file)
 
 
 def get_img_files(dim_file):
