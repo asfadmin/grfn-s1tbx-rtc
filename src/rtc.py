@@ -170,13 +170,12 @@ def create_arcgis_xml(input_granule, output_file, polarization, dem_name):
 def create_geotiff_from_img(input_file, output_file, clean):
     print(f"\nCreating {output_file}")
     temp_file = "temp.tif"
-    cleaned_file = "cleaned.tif"
     system_call(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", input_file, temp_file])
     if clean:
         temp_file = clean_pixels(temp_file)
     system_call(["gdaladdo", "-r", "average", temp_file, "2", "4", "8", "16"])
     system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file, output_file])
-    cleanup(cleaned_file)
+    cleanup(temp_file)
 
 
 def clean_pixels(input_file):
