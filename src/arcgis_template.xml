@@ -1,6 +1,21 @@
 {% set date = now.strftime('%Y%m%d') %}
 {% set time = now.strftime('%H%M%S') %}
-{% set asf = 'Alaska Satellite Facility' %}
+{% set asf = "Alaska Satellite Facility" %}
+{% set acquisition_year = input_granule[17:21] %}
+{% set product_type = input_granule[7:10] %}
+{% set dem_resolutions = {
+    "NED13": "10m",
+    "NED1": "30m",
+    "NED2": "60m",
+    "SRTMGL1": "30m",
+    "SRTMGL3": "90m",
+} %}
+{% set product_descriptions = {
+    "SLC": "Single-Look Complex",
+    "GRD": "Ground Range Detected",
+} %}
+{% set dem_resolution = dem_resolutions[dem_name] %}
+{% set product_description = product_descriptions[product_type] %}
 {% set contact_info %}
   <cntAddress addressType="physical">
     <delPoint>2156 Koyukuk Dr.</delPoint>
@@ -35,8 +50,8 @@
     <ModTime>{{ time }}</ModTime>
   </Esri>
   <dataIdInfo>
-    <idPurp>This file is a Radiometric Terrain Corrected granule of GRD SAR data from the Sentinel-1 mission, processed using S1TBX software. Cell values indicate {{ polarization }} gamma-0 power, and pixel spacing is 30m.</idPurp>
-    <idAbs>This Radiometric Terrain Corrected (RTC) product is derived from a Ground Range Detected (GRD) granule of Synthetic Aperture Radar data from the Copernicus Sentinel-1 mission (European Space Agency), generated using Sentinel-1 Toolbox (S1TBX) release 6.0. It is projected to WGS 84 Universal Transverse Mercator (UTM) coordinates, and is corrected for terrain using a digital elevation model (DEM). The DEM used for this product is {{ dem_name }} (about {{ dem_resolution }} resolution).
+    <idPurp>This file is a Radiometric Terrain Corrected granule of {{ product_type }} SAR data from the Sentinel-1 mission, processed using S1TBX software. Cell values indicate {{ polarization }} gamma-0 power, and pixel spacing is 30m.</idPurp>
+    <idAbs>This Radiometric Terrain Corrected (RTC) product is derived from a {{ product_description }} ({{ product_type }}) granule of Synthetic Aperture Radar data from the Copernicus Sentinel-1 mission (European Space Agency), generated using Sentinel-1 Toolbox (S1TBX) release 6.0. It is projected to WGS 84 Universal Transverse Mercator (UTM) coordinates, and is corrected for terrain using a digital elevation model (DEM). The DEM used for this product is {{ dem_name }} (about {{ dem_resolution }} resolution).
 
 Processing Date/Time: {{ date }} {{ time }} UTC
 
@@ -161,12 +176,13 @@ Additional information about Sentinel-1 data, imagery, tools and applications is
        <statement>Steps in Radiometric Terrain Correction of Sentinel-1 Data using Sentinel-1 Toolbox (S1TBX):
 1. Download and apply precision orbit information
 2. Apply calibration parameters
-3. Apply speckle filtering
-4. Multi-look dataset. For GRD 30-meter product, 3 x 3 looks are used.
-5. Apply radiometric terrain flattening
-6. Apply terrain correction
-7. Optional: Create layover/shadow mask
-8. Post processing creates GeoTIFF files</statement>
+3. If SLC inputs are used, deburst the SLC
+4. Apply speckle filtering
+5. Multi-look dataset. For SLC products, 12 x 3 looks are used; for GRD products, 3 x 3 looks are used.
+6. Apply radiometric terrain flattening
+7. Apply terrain correction
+8. Optional: Create layover/shadow mask
+9. Post processing creates GeoTIFF files</statement>
     </dataLineage>
   </dqInfo>
   <mdMaint>
