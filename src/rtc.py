@@ -22,10 +22,12 @@ COLLECTION_IDS = [
     "C1214471521-ASF",  # SENTINEL-1A_DUAL_POL_GRD_MEDIUM_RES
     "C1214470682-ASF",  # SENTINEL-1A_SINGLE_POL_GRD_HIGH_RES
     "C1214472994-ASF",  # SENTINEL-1A_SINGLE_POL_GRD_MEDIUM_RES
+    "C1214470488-ASF",  # SENTINEL-1A_SLC
     "C1327985645-ASF",  # SENTINEL-1B_DUAL_POL_GRD_HIGH_RES
     "C1327985660-ASF",  # SENTINEL-1B_DUAL_POL_GRD_MEDIUM_RES
     "C1327985571-ASF",  # SENTINEL-1B_SINGLE_POL_GRD_HIGH_RES
     "C1327985740-ASF",  # SENTINEL-1B_SINGLE_POL_GRD_MEDIUM_RES
+    "C1327985661-ASF",  # SENTINEL-1B_SLC
 ]
 USER_AGENT = "asfdaac/s1tbx-rtc"
 
@@ -139,26 +141,13 @@ def pretty_print_xml(content):
     return pretty_printed
 
 
-def get_dem_resolution(dem_name):
-    dem_resolutions = {
-        "NED13": "10m",
-        "NED1": "30m",
-        "NED2": "60m",
-        "SRTMGL1": "30m",
-        "SRTMGL3": "90m",
-    }
-    return dem_resolutions[dem_name]
-
-
 def create_arcgis_xml(input_granule, output_file, polarization, dem_name):
     template = get_xml_template()
     data = {
         "now": datetime.utcnow(),
         "polarization": polarization,
         "input_granule": input_granule,
-        "acquisition_year": input_granule[17:21],
         "dem_name": dem_name,
-        "dem_resolution": get_dem_resolution(dem_name),
     }
     rendered = template.render(data)
     pretty_printed = pretty_print_xml(rendered)
@@ -203,8 +192,14 @@ def process_img_files(granule, dim_file, dem_name=None):
 def process_granule(granule, has_incidence_angle, has_layover, local_file, dem_file, utm_projection):
     local_file = gpt(local_file, "Apply-Orbit-File")
     local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
+
+    range_looks = 3
+    if "_SLC__" in granule:
+        range_looks = 12
+        local_file = gpt(local_file, "TOPSAR-Deburst")
+
     local_file = gpt(local_file, "Speckle-Filter")
-    local_file = gpt(local_file, "Multilook", "-PnRgLooks=3", "-PnAzLooks=3")
+    local_file = gpt(local_file, "Multilook", f"-PnRgLooks={range_looks}", "-PnAzLooks=3")
     terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
 
     if has_layover:
@@ -255,7 +250,7 @@ if __name__ == "__main__":
 
     metadata = get_metadata(args.granule)
     if metadata is None:
-        print(f"\nERROR: Either {args.granule} does exist or it is not a GRD product.")
+        print(f"\nERROR: Either {args.granule} does exist or it is not a GRD/SLC product.")
         exit(1)
 
     write_netrc_file(args.username, args.password)
