@@ -259,7 +259,7 @@ if __name__ == "__main__":
     parser.add_argument("--username", "-u", type=str, help="Earthdata login username", required=True)
     parser.add_argument("--password", "-p", type=str, help="Earthdata login password", required=True)
     parser.add_argument("--layover", "-l", dest="has_layover", action="store_true", help="Include layover shadow mask in ouput")
-    parser.add_argument("--incidence_angle", "-i", dest="has_incidence_angle", action="store_true", help="Include incidence angle in ouput")
+    parser.add_argument("--incidence_angle", "-i", dest="has_incidence_angle", action="store_true", help="Include projected local incidence angle in ouput")
     parser.add_argument("--clean", "-c", dest="clean", action="store_true", help="Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90.")
     args = parser.parse_args()
 
