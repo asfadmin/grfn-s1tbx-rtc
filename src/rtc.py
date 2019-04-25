@@ -180,6 +180,7 @@ def process_img_files(granule, dim_file, dem_name=None, clean=False):
 
 
 def process_img_file(granule, img_file, dem_name=None, clean=False):
+    print("\nCreating output file")
     temp_file = "temp.tif"
     system_call(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", img_file, temp_file])
     cleanup(img_file)
