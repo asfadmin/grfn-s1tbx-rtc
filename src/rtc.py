@@ -66,7 +66,7 @@ def get_bounding_box(polygon):
 
 
 def get_metadata(granule):
-    print("\nFetching Granule Information")
+    print("\nFetching granule information")
 
     params = {
         "readable_granule_name": granule,
@@ -98,7 +98,7 @@ def write_netrc_file(username, password):
 
 # Download the granule file
 def download_file(url):
-    print(f"\nDownloading Granule from {url}")
+    print(f"\nDownloading granule from {url}")
     local_filename = url.split("/")[-1]
     headers = {"User-Agent": USER_AGENT}
     with requests.get(url, headers=headers, stream=True) as r:
@@ -112,7 +112,7 @@ def download_file(url):
 
 # Get the DEM
 def get_dem_file(bounding_box):
-    print("\nPreparing Digital Elevation Model")
+    print("\nPreparing digital elevation model")
     temp_file = "temp_dem"
     dem_name = get_dem(bounding_box["lon_min"], bounding_box["lat_min"], bounding_box["lon_max"], bounding_box["lat_max"], temp_file, True, 30)
     cleanup("temp.vrt")
