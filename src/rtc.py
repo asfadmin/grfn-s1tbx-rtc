@@ -205,7 +205,7 @@ def process_granule(args, local_file, dem_file, utm_projection):
     local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
 
     range_looks = 3
-    if "_SLC__" in granule:
+    if "_SLC__" in args.granule:
         range_looks = 12
         local_file = gpt(local_file, "TOPSAR-Deburst")
 
