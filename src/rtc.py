@@ -158,7 +158,7 @@ def create_arcgis_xml(input_granule, output_file, polarization, dem_name):
 # Process images
 def clean_pixels(input_file):
     cleaned_file = "cleaned.tif"
-    system_call(["gdal_calc.py", "-A", input_file, f"--outfile={cleaned_file}", "--calc=A*(A>.0002)", "--NoDataValue=0"])
+    system_call(["gdal_calc.py", "-A", input_file, f"--outfile={cleaned_file}", "--calc=A*(A>.005)", "--NoDataValue=0"])
     cleanup(input_file)
     return cleaned_file
 
