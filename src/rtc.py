@@ -66,7 +66,7 @@ def get_bounding_box(polygon):
 
 
 def get_metadata(granule):
-    print("\nFetching Granule Information")
+    print("\nFetching granule information")
 
     params = {
         "readable_granule_name": granule,
@@ -98,7 +98,7 @@ def write_netrc_file(username, password):
 
 # Download the granule file
 def download_file(url):
-    print(f"\nDownloading Granule from {url}")
+    print(f"\nDownloading granule from {url}")
     local_filename = url.split("/")[-1]
     headers = {"User-Agent": USER_AGENT}
     with requests.get(url, headers=headers, stream=True) as r:
@@ -112,7 +112,7 @@ def download_file(url):
 
 # Get the DEM
 def get_dem_file(bounding_box):
-    print("\nPreparing Digital Elevation Model")
+    print("\nPreparing digital elevation model")
     temp_file = "temp_dem"
     dem_name = get_dem(bounding_box["lon_min"], bounding_box["lat_min"], bounding_box["lon_max"], bounding_box["lat_max"], temp_file, True, 30)
     cleanup("temp.vrt")
@@ -156,13 +156,11 @@ def create_arcgis_xml(input_granule, output_file, polarization, dem_name):
 
 
 # Process images
-def create_geotiff_from_img(input_file, output_file):
-    print(f"\nCreating {output_file}")
-    temp_file = "temp.tif"
-    system_call(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", input_file, temp_file])
-    system_call(["gdaladdo", "-r", "average", temp_file, "2", "4", "8", "16"])
-    system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file, output_file])
-    cleanup(temp_file)
+def clean_pixels(input_file):
+    cleaned_file = "cleaned.tif"
+    system_call(["gdal_calc.py", "-A", input_file, f"--outfile={cleaned_file}", "--calc=A*(A>.005)", "--NoDataValue=0"])
+    cleanup(input_file)
+    return cleaned_file
 
 
 def get_img_files(dim_file):
@@ -174,27 +172,41 @@ def get_img_files(dim_file):
     return img_files
 
 
-def process_img_files(granule, dim_file, dem_name=None):
+def process_img_files(granule, dim_file, dem_name=None, clean=False):
     for img_file in get_img_files(dim_file):
-        if "projectedLocalIncidenceAngle" in img_file:
-            tif_file_name = f"/output/{granule}_PIA.tif"
-        elif "layover_shadow_mask" in img_file:
-            tif_file_name = f"/output/{granule}_LS.tif"
-        else:
-            polarization = img_file[-6:-4]
-            tif_file_name = f"/output/{granule}_{polarization}_RTC.tif"
-            create_arcgis_xml(granule, f"{tif_file_name}.xml", polarization, dem_name)
-        create_geotiff_from_img(img_file, tif_file_name)
+        process_img_file(granule, img_file, dem_name, clean)
     cleanup(dim_file)
     return None
 
 
-def process_granule(granule, has_incidence_angle, has_layover, local_file, dem_file, utm_projection):
+def process_img_file(granule, img_file, dem_name=None, clean=False):
+    print("\nCreating output file")
+    temp_file = "temp.tif"
+    system_call(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", img_file, temp_file])
+    cleanup(img_file)
+
+    if "projectedLocalIncidenceAngle" in img_file:
+        tif_file_name = f"/output/{granule}_PIA.tif"
+    elif "layover_shadow_mask" in img_file:
+        tif_file_name = f"/output/{granule}_LS.tif"
+    else:
+        if clean:
+            temp_file = clean_pixels(temp_file)
+        polarization = img_file[-6:-4]
+        tif_file_name = f"/output/{granule}_{polarization}_RTC.tif"
+        create_arcgis_xml(granule, f"{tif_file_name}.xml", polarization, dem_name)
+
+    system_call(["gdaladdo", "-r", "average", temp_file, "2", "4", "8", "16"])
+    system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file, tif_file_name])
+    cleanup(temp_file)
+
+
+def process_granule(args, local_file, dem_file, utm_projection):
     local_file = gpt(local_file, "Apply-Orbit-File")
     local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
 
     range_looks = 3
-    if "_SLC__" in granule:
+    if "_SLC__" in args.granule:
         range_looks = 12
         local_file = gpt(local_file, "TOPSAR-Deburst")
 
@@ -202,16 +214,16 @@ def process_granule(granule, has_incidence_angle, has_layover, local_file, dem_f
     local_file = gpt(local_file, "Multilook", f"-PnRgLooks={range_looks}", "-PnAzLooks=3")
     terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
 
-    if has_layover:
+    if args.has_layover:
         local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
         local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={utm_projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
                          "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
-        process_img_files(granule, local_file)
+        process_img_files(args.granule, local_file)
 
-    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={utm_projection}", f"-PsaveProjectedLocalIncidenceAngle={has_incidence_angle}", "-PdemName=External DEM",
+    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={utm_projection}", f"-PsaveProjectedLocalIncidenceAngle={args.has_incidence_angle}", "-PdemName=External DEM",
                      f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
     cleanup(dem_file)
-    process_img_files(granule, local_file, dem_file)
+    process_img_files(args.granule, local_file, dem_file, args.clean)
 
 
 # Code used a little everywhere
@@ -245,7 +257,8 @@ if __name__ == "__main__":
     parser.add_argument("--username", "-u", type=str, help="Earthdata login username", required=True)
     parser.add_argument("--password", "-p", type=str, help="Earthdata login password", required=True)
     parser.add_argument("--layover", "-l", dest="has_layover", action="store_true", help="Include layover shadow mask in ouput")
-    parser.add_argument("--incidence_angle", "-i", dest="has_incidence_angle", action="store_true", help="Include incidence angle in ouput")
+    parser.add_argument("--incidence_angle", "-i", dest="has_incidence_angle", action="store_true", help="Include projected local incidence angle in ouput")
+    parser.add_argument("--clean", "-c", dest="clean", action="store_true", help="Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90.")
     args = parser.parse_args()
 
     metadata = get_metadata(args.granule)
@@ -256,4 +269,4 @@ if __name__ == "__main__":
     write_netrc_file(args.username, args.password)
     dem_file = get_dem_file(metadata["bounding_box"])
     local_file = download_file(metadata["download_url"])
-    process_granule(args.granule, args.has_incidence_angle, args.has_layover, local_file, dem_file, metadata["utm_projection"])
+    process_granule(args, local_file, dem_file, metadata["utm_projection"])
