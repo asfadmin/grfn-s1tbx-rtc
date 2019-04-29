@@ -261,10 +261,10 @@ if __name__ == "__main__":
     parser.add_argument("--clean", "-c", dest="clean", action="store_true", help="Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90.")
     args = parser.parse_args()
 
-    if args.username is None:
+    if not args.username:
         args.username = input("Earthdata Login username: ")
 
-    if args.password is None:
+    if not args.password:
         args.password = getpass("Earthdata Login password: ")
 
     metadata = get_metadata(args.granule)
