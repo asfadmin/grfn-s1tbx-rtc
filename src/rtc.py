@@ -13,7 +13,7 @@ import requests
 from shapely.geometry import Polygon
 from jinja2 import Template
 from lxml import etree
-#from get_dem import get_dem
+from get_dem import get_dem
 
 CHUNK_SIZE = 5242880
 CMR_URL = "https://cmr.earthdata.nasa.gov/search/granules.json"
