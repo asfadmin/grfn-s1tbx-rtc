@@ -262,10 +262,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.username is None:
-        args.username = input("Username: ")
+        args.username = input("Earthdata login username: ")
 
     if args.password is None:
-        args.password = getpass("Password: ")
+        args.password = getpass("Earthdata login password: ")
 
     metadata = get_metadata(args.granule)
     if metadata is None:
