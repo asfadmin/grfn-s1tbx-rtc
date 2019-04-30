@@ -7,6 +7,8 @@ from math import floor
 from argparse import ArgumentParser
 from shutil import rmtree
 from datetime import datetime
+import glob
+import re
 
 # pip3 install
 import requests
@@ -30,7 +32,7 @@ COLLECTION_IDS = [
     "C1327985661-ASF",  # SENTINEL-1B_SLC
 ]
 USER_AGENT = "asfdaac/s1tbx-rtc"
-
+OUTPUT_DIR = "/Users/emlundell/Desktop/output"
 
 # Metadata
 def get_download_url(entry):
@@ -141,18 +143,24 @@ def pretty_print_xml(content):
     return pretty_printed
 
 
-def create_arcgis_xml(input_granule, output_file, polarization, dem_name):
-    template = get_xml_template()
-    data = {
-        "now": datetime.utcnow(),
-        "polarization": polarization,
-        "input_granule": input_granule,
-        "dem_name": dem_name,
-    }
-    rendered = template.render(data)
-    pretty_printed = pretty_print_xml(rendered)
-    with open(output_file, "wb") as f:
-        f.write(pretty_printed)
+def create_arcgis_xml(dem_name):
+    for file in glob.glob(f"{OUTPUT_DIR}/*_RTC.tif", recursive=False):
+        groups = re.match(f"{OUTPUT_DIR}/(.*)_(.*)_RTC.tif", file)
+        output_file = f"{file}.xml"
+        input_granule = groups[1]
+        polarization = groups[2]
+
+        template = get_xml_template()
+        data = {
+            "now": datetime.utcnow(),
+            "polarization": polarization,
+            "input_granule": input_granule,
+            "dem_name": dem_name,
+        }
+        rendered = template.render(data)
+        pretty_printed = pretty_print_xml(rendered)
+        with open(output_file, "wb") as f:
+            f.write(pretty_printed)
 
 
 # Process images
@@ -172,29 +180,28 @@ def get_img_files(dim_file):
     return img_files
 
 
-def process_img_files(granule, dim_file, dem_name=None, clean=False):
+def process_img_files(granule, dim_file, clean=False):
     for img_file in get_img_files(dim_file):
-        process_img_file(granule, img_file, dem_name, clean)
+        process_img_file(granule, img_file, clean)
     cleanup(dim_file)
     return None
 
 
-def process_img_file(granule, img_file, dem_name=None, clean=False):
+def process_img_file(granule, img_file, clean=False):
     print("\nCreating output file")
     temp_file = "temp.tif"
     system_call(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", img_file, temp_file])
     cleanup(img_file)
 
     if "projectedLocalIncidenceAngle" in img_file:
-        tif_file_name = f"/output/{granule}_PIA.tif"
+        tif_file_name = f"{OUTPUT_DIR}/{granule}_PIA.tif"
     elif "layover_shadow_mask" in img_file:
-        tif_file_name = f"/output/{granule}_LS.tif"
+        tif_file_name = f"{OUTPUT_DIR}/{granule}_LS.tif"
     else:
         if clean:
             temp_file = clean_pixels(temp_file)
         polarization = img_file[-6:-4]
-        tif_file_name = f"/output/{granule}_{polarization}_RTC.tif"
-        create_arcgis_xml(granule, f"{tif_file_name}.xml", polarization, dem_name)
+        tif_file_name = f"{OUTPUT_DIR}/{granule}_{polarization}_RTC.tif"
 
     system_call(["gdaladdo", "-r", "average", temp_file, "2", "4", "8", "16"])
     system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file, tif_file_name])
@@ -223,7 +230,7 @@ def process_granule(args, local_file, dem_file, utm_projection):
     local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={utm_projection}", f"-PsaveProjectedLocalIncidenceAngle={args.has_incidence_angle}", "-PdemName=External DEM",
                      f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
     cleanup(dem_file)
-    process_img_files(args.granule, local_file, dem_file, args.clean)
+    process_img_files(args.granule, local_file, args.clean)
 
 
 # Code used a little everywhere
@@ -270,3 +277,5 @@ if __name__ == "__main__":
     dem_file = get_dem_file(metadata["bounding_box"])
     local_file = download_file(metadata["download_url"])
     process_granule(args, local_file, dem_file, metadata["utm_projection"])
+
+    create_arcgis_xml(dem_file)
