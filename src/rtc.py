@@ -144,20 +144,17 @@ def pretty_print_xml(content):
 
 
 def create_arcgis_xml(dem_name):
-    print("\nPreparing arcgis xml file...")
-    for tif_file in glob.glob(f"{OUTPUT_DIR}/*_RTC.tif", recursive=False):
-        groups = re.match(f"{OUTPUT_DIR}/(.*)_(.*)_RTC.tif", tif_file)
+    for tif_file in glob.glob(f"{OUTPUT_DIR}/*_RTC.tif"):
         output_file = f"{tif_file}.xml"
-        input_granule = groups[1]
-        polarization = groups[2]
-
-        template = get_xml_template()
+        print(f"\nPreparing arcgis xml file {output_file}...")
+        groups = re.match(f"{OUTPUT_DIR}/(.*)_(.*)_RTC.tif", tif_file)
         data = {
             "now": datetime.utcnow(),
-            "polarization": polarization,
-            "input_granule": input_granule,
+            "polarization": groups[2],
+            "input_granule": groups[1],
             "dem_name": dem_name,
         }
+        template = get_xml_template()
         rendered = template.render(data)
         pretty_printed = pretty_print_xml(rendered)
         with open(output_file, "wb") as f:
@@ -172,20 +169,11 @@ def clean_pixels(input_file):
     return cleaned_file
 
 
-def get_img_files(dim_file):
-    img_files = []
-    data_dir = dim_file.replace(".dim", ".data")
-    for file_name in os.listdir(data_dir):
-        if file_name.endswith(".img"):
-            img_files.append(f"{data_dir}/{file_name}")
-    return img_files
-
-
 def process_img_files(granule, dim_file, clean=False):
-    for img_file in get_img_files(dim_file):
+    data_dir = dim_file.replace(".dim", ".data")
+    for img_file in glob.glob(f"{data_dir}/*.img"):
         process_img_file(granule, img_file, clean)
     cleanup(dim_file)
-    return None
 
 
 def process_img_file(granule, img_file, clean=False):
@@ -195,17 +183,17 @@ def process_img_file(granule, img_file, clean=False):
     cleanup(img_file)
 
     if "projectedLocalIncidenceAngle" in img_file:
-        tif_file_name = f"{OUTPUT_DIR}/{granule}_PIA.tif"
+        tiff_suffix = "PIA.tif"
     elif "layover_shadow_mask" in img_file:
-        tif_file_name = f"{OUTPUT_DIR}/{granule}_LS.tif"
+        tiff_suffix = "LS.tif"
     else:
         if clean:
             temp_file = clean_pixels(temp_file)
         polarization = img_file[-6:-4]
-        tif_file_name = f"{OUTPUT_DIR}/{granule}_{polarization}_RTC.tif"
+        tiff_suffix = f"{polarization}_RTC.tif"
 
     system_call(["gdaladdo", "-r", "average", temp_file, "2", "4", "8", "16"])
-    system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file, tif_file_name])
+    system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file, f"{OUTPUT_DIR}/{granule}_{tiff_suffix}"])
     cleanup(temp_file)
 
 
@@ -284,5 +272,4 @@ if __name__ == "__main__":
     dem_file = get_dem_file(metadata["bounding_box"])
     local_file = download_file(metadata["download_url"])
     process_granule(args, local_file, dem_file, metadata["utm_projection"])
-
     create_arcgis_xml(dem_file)
