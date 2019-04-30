@@ -1,6 +1,5 @@
 #!/usr/local/bin/python3
 
-# Standard libraries
 import os
 import subprocess
 from math import floor
@@ -9,6 +8,7 @@ from shutil import rmtree
 from datetime import datetime
 import glob
 import re
+from getpass import getpass
 
 # pip3 install
 import requests
@@ -261,12 +261,18 @@ def gpt(input_file, command, *args, cleanup_flag=True):
 if __name__ == "__main__":
     parser = ArgumentParser(description="Radiometric Terrain Correction using the SENTINEL-1 Toolbox")
     parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 granule name", required=True)
-    parser.add_argument("--username", "-u", type=str, help="Earthdata login username", required=True)
-    parser.add_argument("--password", "-p", type=str, help="Earthdata login password", required=True)
+    parser.add_argument("--username", "-u", type=str, help="Earthdata Login username")
+    parser.add_argument("--password", "-p", type=str, help="Earthdata Login password")
     parser.add_argument("--layover", "-l", dest="has_layover", action="store_true", help="Include layover shadow mask in ouput")
     parser.add_argument("--incidence_angle", "-i", dest="has_incidence_angle", action="store_true", help="Include projected local incidence angle in ouput")
     parser.add_argument("--clean", "-c", dest="clean", action="store_true", help="Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90.")
     args = parser.parse_args()
+
+    if not args.username:
+        args.username = input("Earthdata Login username: ")
+
+    if not args.password:
+        args.password = getpass("Earthdata Login password: ")
 
     metadata = get_metadata(args.granule)
     if metadata is None:
