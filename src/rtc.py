@@ -146,7 +146,8 @@ def pretty_print_xml(content):
 def create_arcgis_xml(dem_name):
     for tif_file in glob.glob(f"{OUTPUT_DIR}/*_RTC.tif"):
         output_file = f"{tif_file}.xml"
-        print(f"\nPreparing arcgis xml file {output_file}...")
+        print(f"\nPreparing arcgis xml file {output_file}.")
+
         groups = re.match(f"{OUTPUT_DIR}/(.*)_(.*)_RTC.tif", tif_file)
         data = {
             "now": datetime.utcnow(),
@@ -154,6 +155,7 @@ def create_arcgis_xml(dem_name):
             "input_granule": groups[1],
             "dem_name": dem_name,
         }
+
         template = get_xml_template()
         rendered = template.render(data)
         pretty_printed = pretty_print_xml(rendered)
@@ -183,17 +185,17 @@ def process_img_file(granule, img_file, clean=False):
     cleanup(img_file)
 
     if "projectedLocalIncidenceAngle" in img_file:
-        tiff_suffix = "PIA.tif"
+        tiff_suffix = "PIA"
     elif "layover_shadow_mask" in img_file:
-        tiff_suffix = "LS.tif"
+        tiff_suffix = "LS"
     else:
         if clean:
             temp_file = clean_pixels(temp_file)
         polarization = img_file[-6:-4]
-        tiff_suffix = f"{polarization}_RTC.tif"
+        tiff_suffix = f"{polarization}_RTC"
 
     system_call(["gdaladdo", "-r", "average", temp_file, "2", "4", "8", "16"])
-    system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file, f"{OUTPUT_DIR}/{granule}_{tiff_suffix}"])
+    system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file, f"{OUTPUT_DIR}/{granule}_{tiff_suffix}.tif"])
     cleanup(temp_file)
 
 
