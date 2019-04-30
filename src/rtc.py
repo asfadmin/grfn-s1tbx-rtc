@@ -46,16 +46,6 @@ def get_polygon(entry):
     return Polygon(points)
 
 
-def get_utm_projection(polygon):
-    lat, lon = polygon.centroid.coords[0]
-
-    utm_band = (floor((lon + 180) / 6) % 60) + 1
-    if lat >= 0:
-        return f"EPSG:326{utm_band:02}"
-    else:
-        return f"EPSG:327{utm_band:02}"
-
-
 def get_bounding_box(polygon):
     return {
         "lat_min": polygon.bounds[0],
@@ -85,7 +75,6 @@ def get_metadata(granule):
     return {
         "download_url": get_download_url(entry),
         "bounding_box": get_bounding_box(polygon),
-        "utm_projection": get_utm_projection(polygon)
     }
 
 
@@ -201,7 +190,7 @@ def process_img_file(granule, img_file, dem_name=None, clean=False):
     cleanup(temp_file)
 
 
-def process_granule(args, local_file, dem_file, utm_projection):
+def process_granule(args, local_file, dem_file):
     local_file = gpt(local_file, "Apply-Orbit-File")
     local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
 
@@ -216,11 +205,11 @@ def process_granule(args, local_file, dem_file, utm_projection):
 
     if args.has_layover:
         local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
-        local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={utm_projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
+        local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection=AUTO:42001", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
                          "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
         process_img_files(args.granule, local_file)
 
-    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={utm_projection}", f"-PsaveProjectedLocalIncidenceAngle={args.has_incidence_angle}", "-PdemName=External DEM",
+    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection=AUTO:42001", f"-PsaveProjectedLocalIncidenceAngle={args.has_incidence_angle}", "-PdemName=External DEM",
                      f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
     cleanup(dem_file)
     process_img_files(args.granule, local_file, dem_file, args.clean)
@@ -275,4 +264,4 @@ if __name__ == "__main__":
     write_netrc_file(args.username, args.password)
     dem_file = get_dem_file(metadata["bounding_box"])
     local_file = download_file(metadata["download_url"])
-    process_granule(args, local_file, dem_file, metadata["utm_projection"])
+    process_granule(args, local_file, dem_file)
