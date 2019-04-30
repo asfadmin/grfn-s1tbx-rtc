@@ -32,7 +32,7 @@ COLLECTION_IDS = [
     "C1327985661-ASF",  # SENTINEL-1B_SLC
 ]
 USER_AGENT = "asfdaac/s1tbx-rtc"
-OUTPUT_DIR = "/Users/emlundell/Desktop/output"
+OUTPUT_DIR = "/output"
 
 # Metadata
 def get_download_url(entry):
@@ -144,6 +144,7 @@ def pretty_print_xml(content):
 
 
 def create_arcgis_xml(dem_name):
+    print("\nPreparing arcgis xml file...")
     for tif_file in glob.glob(f"{OUTPUT_DIR}/*_RTC.tif", recursive=False):
         groups = re.match(f"{OUTPUT_DIR}/(.*)_(.*)_RTC.tif", tif_file)
         output_file = f"{tif_file}.xml"
