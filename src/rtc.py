@@ -144,9 +144,9 @@ def pretty_print_xml(content):
 
 
 def create_arcgis_xml(dem_name):
-    for file in glob.glob(f"{OUTPUT_DIR}/*_RTC.tif", recursive=False):
-        groups = re.match(f"{OUTPUT_DIR}/(.*)_(.*)_RTC.tif", file)
-        output_file = f"{file}.xml"
+    for tif_file in glob.glob(f"{OUTPUT_DIR}/*_RTC.tif", recursive=False):
+        groups = re.match(f"{OUTPUT_DIR}/(.*)_(.*)_RTC.tif", tif_file)
+        output_file = f"{tif_file}.xml"
         input_granule = groups[1]
         polarization = groups[2]
 
