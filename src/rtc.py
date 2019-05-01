@@ -242,14 +242,15 @@ class ProcessGranule(object):
             with open(output_file, "wb") as f:
                 f.write(pretty_printed)
 
-    def static _get_xml_template():
+    @staticmethod
+    def _get_xml_template():
         with open("arcgis_template.xml", "r") as t:
             template_text = t.read()
         template = Template(template_text)
         return template
 
-
-    def static _pretty_print_xml(content):
+    @staticmethod
+    def _pretty_print_xml(content):
         parser = etree.XMLParser(remove_blank_text=True)
         root = etree.fromstring(content, parser)
         pretty_printed = etree.tostring(root, pretty_print=True)
