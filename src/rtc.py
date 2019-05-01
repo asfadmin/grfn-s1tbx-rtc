@@ -234,7 +234,7 @@ class ProcessGranule(object):
                 "now": datetime.utcnow(),
                 "polarization": groups[1],
                 "input_granule": self.granule,
-                "dem_name": self.dem_name,
+                "dem_name": self.dem_file,
             }
 
             template = _get_xml_template()
