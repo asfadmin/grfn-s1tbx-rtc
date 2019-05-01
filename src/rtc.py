@@ -163,7 +163,7 @@ def gpt(input_file, command, *args, cleanup_flag=True):
 class ProcessGranule(object):
 
     def __init__(self, args, dem_file, utm_projection):
-        self.granule = args.granules
+        self.granule = args.granule
         self.has_layover = args.has_layover
         self.has_incidence_angle = args.has_incidence_angle
         self.clean = args.clean
