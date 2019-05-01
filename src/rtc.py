@@ -186,13 +186,13 @@ class ProcessGranule(object):
         terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767")
 
         if self.has_layover:
-            local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767", "-PsaveLayoverShadowMask=true", self.clean)
+            local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
             local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={self.utm_projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
                              "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767")
             self._process_img_files(local_file)
 
         local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={self.utm_projection}", f"-PsaveProjectedLocalIncidenceAngle={self.has_incidence_angle}", "-PdemName=External DEM",
-                         f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767", self.clean)
+                         f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
         cleanup(self.dem_file)
         self._process_img_files(local_file)
 
@@ -213,7 +213,7 @@ class ProcessGranule(object):
         elif "layover_shadow_mask" in img_file:
             tiff_suffix = "LS"
         else:
-            if clean:
+            if self.clean:
                 temp_file = clean_pixels(temp_file)
             polarization = img_file[-6:-4]
             tiff_suffix = f"{polarization}_RTC"
