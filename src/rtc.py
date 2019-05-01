@@ -232,7 +232,7 @@ class ProcessGranule(object):
             groups = re.match(f"{self.output_dir}/{self.granule}_(.*)_RTC.tif", tif_file)
             data = {
                 "now": datetime.utcnow(),
-                "polarization": groups[2],
+                "polarization": groups[1],
                 "input_granule": self.granule,
                 "dem_name": self.dem_name,
             }
