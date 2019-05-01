@@ -142,13 +142,13 @@ def gpt(input_file, command, *args, cleanup_flag=True):
 
 class ProcessGranule():
 
-    def __init__(self, args, dem_file, utm_projection):
+    def __init__(self, args, dem_file):
         self.granule = args.granule
         self.has_layover = args.has_layover
         self.has_incidence_angle = args.has_incidence_angle
         self.clean = args.clean
         self.dem_file = dem_file
-        self.utm_projection = utm_projection
+        self.projection = "AUTO:42001"
 
         self.output_dir = f"/output/{datetime.utcnow().strftime('%Y%m%d-%H%M%S')}"
         os.makedirs(self.output_dir, exist_ok=True)
@@ -168,11 +168,11 @@ class ProcessGranule():
 
         if self.has_layover:
             local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
-            local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={self.utm_projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
+            local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={self.projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
                              "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767")
             self._process_img_files(local_file)
 
-        local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={self.utm_projection}", f"-PsaveProjectedLocalIncidenceAngle={self.has_incidence_angle}", "-PdemName=External DEM",
+        local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={self.projection}", f"-PsaveProjectedLocalIncidenceAngle={self.has_incidence_angle}", "-PdemName=External DEM",
                          f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
         cleanup(self.dem_file)
         self._process_img_files(local_file)
@@ -270,6 +270,6 @@ if __name__ == "__main__":
     dem_file = get_dem_file(metadata["bounding_box"])
     local_file = download_file(metadata["download_url"])
 
-    pg = ProcessGranule(args, dem_file, metadata["utm_projection"])
+    pg = ProcessGranule(args, dem_file)
     pg.process_granule(local_file)
     pg.create_arcgis_xml()
