@@ -9,7 +9,6 @@ from datetime import datetime
 import glob
 import re
 from getpass import getpass
-from datetime import datetime
 
 # pip3 install
 import requests
@@ -141,7 +140,6 @@ def system_call(params):
     return_code = subprocess.call(params)
     if return_code:
         exit(return_code)
-    return None
 
 
 def cleanup(input_file):
@@ -160,7 +158,7 @@ def gpt(input_file, command, *args, cleanup_flag=True):
     return f"{command}.dim"
 
 
-class ProcessGranule(object):
+class ProcessGranule():
 
     def __init__(self, args, dem_file, utm_projection):
         self.granule = args.granule
@@ -237,9 +235,9 @@ class ProcessGranule(object):
                 "dem_name": self.dem_file,
             }
 
-            template = _get_xml_template()
+            template = self._get_xml_template()
             rendered = template.render(data)
-            pretty_printed = _pretty_print_xml(rendered)
+            pretty_printed = self._pretty_print_xml(rendered)
             with open(output_file, "wb") as f:
                 f.write(pretty_printed)
 
