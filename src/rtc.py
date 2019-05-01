@@ -47,16 +47,6 @@ def get_polygon(entry):
     return Polygon(points)
 
 
-def get_utm_projection(polygon):
-    lat, lon = polygon.centroid.coords[0]
-
-    utm_band = (floor((lon + 180) / 6) % 60) + 1
-    if lat >= 0:
-        return f"EPSG:326{utm_band:02}"
-    else:
-        return f"EPSG:327{utm_band:02}"
-
-
 def get_bounding_box(polygon):
     return {
         "lat_min": polygon.bounds[0],
@@ -86,7 +76,6 @@ def get_metadata(granule):
     return {
         "download_url": get_download_url(entry),
         "bounding_box": get_bounding_box(polygon),
-        "utm_projection": get_utm_projection(polygon)
     }
 
 
@@ -133,6 +122,7 @@ def clean_pixels(input_file):
     system_call(["gdal_calc.py", "-A", input_file, f"--outfile={cleaned_file}", "--calc=A*(A>.005)", "--NoDataValue=0"])
     cleanup(input_file)
     return cleaned_file
+
 
 # Code used a little everywhere
 def system_call(params):
