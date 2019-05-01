@@ -171,6 +171,7 @@ class ProcessGranule(object):
         self.utm_projection = utm_projection
 
         self.output_dir = f"/output/{datetime.utcnow().strftime('%Y%m%d-%H%M%S')}"
+        os.makedirs(self.output_dir, exist_ok=True)
 
     def process_granule(self, local_file):
         local_file = gpt(local_file, "Apply-Orbit-File")
