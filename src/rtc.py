@@ -2,7 +2,6 @@
 
 import os
 import subprocess
-from math import floor
 from argparse import ArgumentParser
 from shutil import rmtree
 from datetime import datetime
@@ -32,6 +31,7 @@ COLLECTION_IDS = [
     "C1327985661-ASF",  # SENTINEL-1B_SLC
 ]
 USER_AGENT = "asfdaac/s1tbx-rtc"
+
 
 # Metadata
 def get_download_url(entry):
@@ -116,14 +116,6 @@ def get_dem_file(bounding_box):
     return dem_name
 
 
-# Process images
-def clean_pixels(input_file):
-    cleaned_file = "cleaned.tif"
-    system_call(["gdal_calc.py", "-A", input_file, f"--outfile={cleaned_file}", "--calc=A*(A>.005)", "--NoDataValue=0"])
-    cleanup(input_file)
-    return cleaned_file
-
-
 # Code used a little everywhere
 def system_call(params):
     print(" ".join(params))
@@ -203,13 +195,20 @@ class ProcessGranule():
             tiff_suffix = "LS"
         else:
             if self.clean:
-                temp_file = clean_pixels(temp_file)
+                temp_file = self._clean_pixels(temp_file)
             polarization = img_file[-6:-4]
             tiff_suffix = f"{polarization}_RTC"
 
         system_call(["gdaladdo", "-r", "average", temp_file, "2", "4", "8", "16"])
         system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file, f"{self.output_dir}/{self.granule}_{tiff_suffix}.tif"])
         cleanup(temp_file)
+
+    # Process images
+    def _clean_pixels(self, temp_file):
+        cleaned_file = "cleaned.tif"
+        system_call(["gdal_calc.py", "-A", temp_file, f"--outfile={cleaned_file}", "--calc=A*(A>.005)", "--NoDataValue=0"])
+        cleanup(temp_file)
+        return cleaned_file
 
     # XML
     def create_arcgis_xml(self):
