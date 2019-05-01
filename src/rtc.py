@@ -176,6 +176,7 @@ class ProcessGranule():
                          f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
         cleanup(self.dem_file)
         self._process_img_files(local_file)
+        self._create_arcgis_xml()
 
     def _process_img_files(self, dim_file):
         data_dir = dim_file.replace(".dim", ".data")
@@ -211,7 +212,7 @@ class ProcessGranule():
         return cleaned_file
 
     # XML
-    def create_arcgis_xml(self):
+    def _create_arcgis_xml(self):
         for tif_file in glob.glob(f"{self.output_dir}/*_RTC.tif"):
             output_file = f"{tif_file}.xml"
             print(f"\nPreparing arcgis xml file {output_file}.")
@@ -272,4 +273,3 @@ if __name__ == "__main__":
 
     pg = ProcessGranule(args, dem_file)
     pg.process_granule(local_file)
-    pg.create_arcgis_xml()
