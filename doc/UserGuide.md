@@ -12,6 +12,9 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 
 ## Installation
 
+1. Download and install [Docker Desktop for Windows](https://hub.docker.com/editions/community/docker-ce-desktop-windows)
+1. Download the [s1tbx-rtc.bat](../scripts/s1tbx-rtc.bat) convenience script
+
 ## Usage
 
 ## Advanced Options
