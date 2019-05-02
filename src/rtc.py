@@ -1,13 +1,14 @@
 #!/usr/local/bin/python3
 
-# Standard libraries
 import os
 import subprocess
-from math import floor
 from argparse import ArgumentParser
 from shutil import rmtree
 from datetime import datetime
+import glob
+import re
 from getpass import getpass
+
 # pip3 install
 import requests
 from shapely.geometry import Polygon
@@ -115,113 +116,12 @@ def get_dem_file(bounding_box):
     return dem_name
 
 
-# XML
-def get_xml_template():
-    with open("arcgis_template.xml", "r") as t:
-        template_text = t.read()
-    template = Template(template_text)
-    return template
-
-
-def pretty_print_xml(content):
-    parser = etree.XMLParser(remove_blank_text=True)
-    root = etree.fromstring(content, parser)
-    pretty_printed = etree.tostring(root, pretty_print=True)
-    return pretty_printed
-
-
-def create_arcgis_xml(input_granule, output_file, polarization, dem_name):
-    template = get_xml_template()
-    data = {
-        "now": datetime.utcnow(),
-        "polarization": polarization,
-        "input_granule": input_granule,
-        "dem_name": dem_name,
-    }
-    rendered = template.render(data)
-    pretty_printed = pretty_print_xml(rendered)
-    with open(output_file, "wb") as f:
-        f.write(pretty_printed)
-
-
-# Process images
-def clean_pixels(input_file):
-    cleaned_file = "cleaned.tif"
-    system_call(["gdal_calc.py", "-A", input_file, f"--outfile={cleaned_file}", "--calc=A*(A>.005)", "--NoDataValue=0"])
-    cleanup(input_file)
-    return cleaned_file
-
-
-def get_img_files(dim_file):
-    img_files = []
-    data_dir = dim_file.replace(".dim", ".data")
-    for file_name in os.listdir(data_dir):
-        if file_name.endswith(".img"):
-            img_files.append(f"{data_dir}/{file_name}")
-    return img_files
-
-
-def process_img_files(granule, dim_file, dem_name=None, clean=False):
-    for img_file in get_img_files(dim_file):
-        process_img_file(granule, img_file, dem_name, clean)
-    cleanup(dim_file)
-    return None
-
-
-def process_img_file(granule, img_file, dem_name=None, clean=False):
-    print("\nCreating output file")
-    temp_file = "temp.tif"
-    system_call(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", img_file, temp_file])
-    cleanup(img_file)
-
-    if "projectedLocalIncidenceAngle" in img_file:
-        tif_file_name = f"/output/{granule}_PIA.tif"
-    elif "layover_shadow_mask" in img_file:
-        tif_file_name = f"/output/{granule}_LS.tif"
-    else:
-        if clean:
-            temp_file = clean_pixels(temp_file)
-        polarization = img_file[-6:-4]
-        tif_file_name = f"/output/{granule}_{polarization}_RTC.tif"
-        create_arcgis_xml(granule, f"{tif_file_name}.xml", polarization, dem_name)
-
-    system_call(["gdaladdo", "-r", "average", temp_file, "2", "4", "8", "16"])
-    system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file, tif_file_name])
-    cleanup(temp_file)
-
-
-def process_granule(args, local_file, dem_file):
-    local_file = gpt(local_file, "Apply-Orbit-File")
-    local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
-
-    range_looks = 3
-    if "_SLC__" in args.granule:
-        range_looks = 12
-        local_file = gpt(local_file, "TOPSAR-Deburst")
-
-    local_file = gpt(local_file, "Speckle-Filter")
-    local_file = gpt(local_file, "Multilook", f"-PnRgLooks={range_looks}", "-PnAzLooks=3")
-    terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
-
-    if args.has_layover:
-        local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
-        local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection=AUTO:42001", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
-                         "-PdemName=External DEM", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767")
-        process_img_files(args.granule, local_file)
-
-    local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection=AUTO:42001", f"-PsaveProjectedLocalIncidenceAngle={args.has_incidence_angle}", "-PdemName=External DEM",
-                     f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
-    cleanup(dem_file)
-    process_img_files(args.granule, local_file, dem_file, args.clean)
-
-
 # Code used a little everywhere
 def system_call(params):
     print(" ".join(params))
     return_code = subprocess.call(params)
     if return_code:
         exit(return_code)
-    return None
 
 
 def cleanup(input_file):
@@ -238,6 +138,111 @@ def gpt(input_file, command, *args, cleanup_flag=True):
     if cleanup_flag:
         cleanup(input_file)
     return f"{command}.dim"
+
+
+class ProcessGranule():
+
+    def __init__(self, args, dem_file):
+        self.granule = args.granule
+        self.has_layover = args.has_layover
+        self.has_incidence_angle = args.has_incidence_angle
+        self.clean = args.clean
+        self.dem_file = dem_file
+        self.projection = "AUTO:42001"
+
+        self.output_dir = f"/output"
+
+    def process_granule(self, local_file):
+        local_file = gpt(local_file, "Apply-Orbit-File")
+        local_file = gpt(local_file, "Calibration", "-PoutputBetaBand=true", "-PoutputSigmaBand=false")
+
+        range_looks = 3
+        if "_SLC__" in self.granule:
+            range_looks = 12
+            local_file = gpt(local_file, "TOPSAR-Deburst")
+
+        local_file = gpt(local_file, "Speckle-Filter")
+        local_file = gpt(local_file, "Multilook", f"-PnRgLooks={range_looks}", "-PnAzLooks=3")
+        terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767")
+
+        if self.has_layover:
+            local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
+            local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={self.projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
+                             "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767")
+            self._process_img_files(local_file)
+
+        local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={self.projection}", f"-PsaveProjectedLocalIncidenceAngle={self.has_incidence_angle}", "-PdemName=External DEM",
+                         f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
+        cleanup(self.dem_file)
+        self._process_img_files(local_file)
+        self._create_arcgis_xml()
+
+    def _process_img_files(self, dim_file):
+        data_dir = dim_file.replace(".dim", ".data")
+        for img_file in glob.glob(f"{data_dir}/*.img"):
+            self._process_img_file(img_file)
+        cleanup(dim_file)
+
+    def _process_img_file(self, img_file):
+        print("\nCreating output file")
+        temp_file = "temp.tif"
+        system_call(["gdal_translate", "-of", "GTiff", "-a_nodata", "0", img_file, temp_file])
+        cleanup(img_file)
+
+        if "projectedLocalIncidenceAngle" in img_file:
+            tiff_suffix = "PIA"
+        elif "layover_shadow_mask" in img_file:
+            tiff_suffix = "LS"
+        else:
+            if self.clean:
+                temp_file = self._clean_pixels(temp_file)
+            polarization = img_file[-6:-4]
+            tiff_suffix = f"{polarization}_RTC"
+
+        system_call(["gdaladdo", "-r", "average", temp_file, "2", "4", "8", "16"])
+        system_call(["gdal_translate", "-co", "TILED=YES", "-co", "COMPRESS=DEFLATE", "-co", "COPY_SRC_OVERVIEWS=YES", temp_file, f"{self.output_dir}/{self.granule}_{tiff_suffix}.tif"])
+        cleanup(temp_file)
+
+    # Process images
+    def _clean_pixels(self, temp_file):
+        cleaned_file = "cleaned.tif"
+        system_call(["gdal_calc.py", "-A", temp_file, f"--outfile={cleaned_file}", "--calc=A*(A>.005)", "--NoDataValue=0"])
+        cleanup(temp_file)
+        return cleaned_file
+
+    # XML
+    def _create_arcgis_xml(self):
+        for tif_file in glob.glob(f"{self.output_dir}/{self.granule}_*_RTC.tif"):
+            output_file = f"{tif_file}.xml"
+            print(f"\nPreparing arcgis xml file {output_file}.")
+
+            groups = re.match(f"{self.output_dir}/{self.granule}_(.*)_RTC.tif", tif_file)
+            data = {
+                "now": datetime.utcnow(),
+                "polarization": groups[1],
+                "input_granule": self.granule,
+                "dem_name": self.dem_file,
+            }
+
+            template = self._get_xml_template()
+            rendered = template.render(data)
+            pretty_printed = self._pretty_print_xml(rendered)
+            with open(output_file, "wb") as f:
+                f.write(pretty_printed)
+
+    @staticmethod
+    def _get_xml_template():
+        with open("arcgis_template.xml", "r") as t:
+            template_text = t.read()
+        template = Template(template_text)
+        return template
+
+    @staticmethod
+    def _pretty_print_xml(content):
+        parser = etree.XMLParser(remove_blank_text=True)
+        root = etree.fromstring(content, parser)
+        pretty_printed = etree.tostring(root, pretty_print=True)
+        return pretty_printed
 
 
 if __name__ == "__main__":
@@ -264,4 +269,6 @@ if __name__ == "__main__":
     write_netrc_file(args.username, args.password)
     dem_file = get_dem_file(metadata["bounding_box"])
     local_file = download_file(metadata["download_url"])
-    process_granule(args, local_file, dem_file)
+
+    pg = ProcessGranule(args, dem_file)
+    pg.process_granule(local_file)
