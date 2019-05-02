@@ -265,6 +265,10 @@ if __name__ == "__main__":
     if metadata is None:
         print(f"\nERROR: Either {args.granule} does exist or it is not a GRD/SLC product.")
         exit(1)
+    
+    if metadata["bounding_box"]["lon_min"] < -170 and metadata["bounding_box"]["lon_max"] > 170:
+        print(f"\nERROR: Granules crossing the antimeridian are not supported.")
+        exit(1)
 
     write_netrc_file(args.username, args.password)
     dem_file = get_dem_file(metadata["bounding_box"])
