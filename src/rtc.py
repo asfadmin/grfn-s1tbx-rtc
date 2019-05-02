@@ -261,7 +261,7 @@ if __name__ == "__main__":
         print(f"\nERROR: Either {args.granule} does exist or it is not a GRD/SLC product.")
         exit(1)
     
-    if metadata["lon_min"] < -170 and metadata["lon_max"] > 170:
+    if metadata["bounding_box"]["lon_min"] < -170 and metadata["bounding_box"]["lon_max"] > 170:
         print(f"\nERROR: {args.granule} may cross the antimeridian and is not supoorted at this time.")
         exit(1)
 
