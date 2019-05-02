@@ -150,8 +150,7 @@ class ProcessGranule():
         self.dem_file = dem_file
         self.projection = "AUTO:42001"
 
-        self.output_dir = f"/output/{datetime.utcnow().strftime('%Y%m%d-%H%M%S')}"
-        os.makedirs(self.output_dir, exist_ok=True)
+        self.output_dir = f"/output"
 
     def process_granule(self, local_file):
         local_file = gpt(local_file, "Apply-Orbit-File")
@@ -213,7 +212,7 @@ class ProcessGranule():
 
     # XML
     def _create_arcgis_xml(self):
-        for tif_file in glob.glob(f"{self.output_dir}/*_RTC.tif"):
+        for tif_file in glob.glob(f"{self.output_dir}/{self.granule}_*_RTC.tif"):
             output_file = f"{tif_file}.xml"
             print(f"\nPreparing arcgis xml file {output_file}.")
 
