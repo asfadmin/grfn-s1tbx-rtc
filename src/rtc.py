@@ -256,10 +256,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if not args.username:
-        args.username = input("Earthdata Login username: ")
+        args.username = input("\nEarthdata Login username: ")
 
     if not args.password:
-        args.password = getpass("Earthdata Login password: ")
+        args.password = getpass("\nEarthdata Login password: ")
 
     metadata = get_metadata(args.granule)
     if metadata is None:
@@ -271,8 +271,8 @@ if __name__ == "__main__":
         exit(1)
 
     write_netrc_file(args.username, args.password)
-    dem_file = get_dem_file(metadata["bounding_box"])
     local_file = download_file(metadata["download_url"])
-
+    dem_file = get_dem_file(metadata["bounding_box"])
+    
     pg = ProcessGranule(args, dem_file)
     pg.process_granule(local_file)
