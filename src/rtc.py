@@ -262,7 +262,7 @@ if __name__ == "__main__":
         exit(1)
     
     if metadata["bounding_box"]["lon_min"] < -170 and metadata["bounding_box"]["lon_max"] > 170:
-        print(f"\nERROR: Granules crossing the antimeridian are not supoorted.")
+        print(f"\nERROR: Granules crossing the antimeridian are not supported.")
         exit(1)
 
     write_netrc_file(args.username, args.password)
