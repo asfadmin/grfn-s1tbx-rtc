@@ -17,5 +17,11 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 
 ## Usage
 
+1. Find the name of the GRD or SLC granule to process from [Vertex](https://vertex.daac.asf.alaska.edu/)
+1. Make sure Docker is running
+1. Download the [s1tbx-rtc.bat](../scripts/s1tbx-rtc.bat) script to the directory where RTC products saved
+1. Run the s1tbx-rtc.bat script
+1. Provide your granule name, Earthdata Login username, and Earthdata Login password
+
 ## Advanced Options
 
