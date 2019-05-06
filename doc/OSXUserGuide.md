@@ -17,6 +17,12 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 1. Download and install [Docker Desktop for OSX](https://download.docker.com/mac/stable/Docker.dmg)
 1. Download the [s1tbx-rtc.sh](../scripts/s1tbx-rtc.sh) convenience script
 
+## Configure Docker
+
+1. Open Docker and click preferences
+1. clock on advanced and allocate the correct RAM and CPU to docker
+![advanced](https://docs.docker.com/docker-for-mac/images/menu/prefs-advanced.png)
+
 ## Usage
 
 1. Find the name of the GRD or SLC granule to process from [Vertex](https://vertex.daac.asf.alaska.edu/)
