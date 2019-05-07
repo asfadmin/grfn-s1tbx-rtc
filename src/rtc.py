@@ -283,7 +283,7 @@ if __name__ == "__main__":
     else:
         cleandem = False
         dem_file = args.demName
-        dem_parameters = [f"-PdemName={args.demName}"]
+        dem_parameters = [f"-PdemName='{args.demName}'"]
 
     pg = ProcessGranule(args, dem_parameters, dem_file, cleandem)
     pg.process_granule(local_file)
