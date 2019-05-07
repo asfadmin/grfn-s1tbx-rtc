@@ -144,14 +144,14 @@ def gpt(input_file, command, *args, dem_parameters=None, cleanup_flag=True):
 
 class ProcessGranule():
 
-    def __init__(self, args, dem_parameters, dem_file, cleandem):
+    def __init__(self, args, dem_parameters, dem_file, dem_name):
         self.granule = args.granule
         self.has_layover = args.has_layover
         self.has_incidence_angle = args.has_incidence_angle
         self.clean = args.clean
         self.dem_parameters = dem_parameters
         self.dem_file = dem_file
-        self.cleandem = cleandem
+        self.dem_name = dem_name
         self.projection = "AUTO:42001"
 
         self.output_dir = f"/output"
@@ -175,7 +175,7 @@ class ProcessGranule():
 
         local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={self.projection}", f"-PsaveProjectedLocalIncidenceAngle={self.has_incidence_angle}", dem_parameters=self.dem_parameters)
          
-        if self.cleandem:
+        if self.dem_file:
             cleanup(self.dem_file)
         self._process_img_files(local_file)
         self._create_arcgis_xml()
@@ -219,13 +219,12 @@ class ProcessGranule():
             output_file = f"{tif_file}.xml"
             print(f"\nPreparing arcgis xml file {output_file}.")
 
-
             groups = re.match(f"{self.output_dir}/{self.granule}_(.*)_RTC.tif", tif_file)
             data = {
                 "now": datetime.utcnow(),
                 "polarization": groups[1],
                 "input_granule": self.granule,
-                "dem_name": self.dem_file,
+                "dem_name": self.dem_name,
             }
 
             template = self._get_xml_template()
@@ -278,13 +277,13 @@ if __name__ == "__main__":
     local_file = download_file(metadata["download_url"])
 
     if args.demName == "ASF":
-        cleandem = True
-        dem_file = get_dem_file(metadata["bounding_box"])
+        dem_name = get_dem_file(metadata["bounding_box"])
+        dem_file = dem_name
         dem_parameters = ["-PdemName='External DEM'", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767"]
     else:
-        cleandem = False
-        dem_file = args.demName
+        dem_name = args.demName
+        dem_file = None
         dem_parameters = [f"-PdemName={args.demName}"]
 
-    pg = ProcessGranule(args, dem_parameters, dem_file, cleandem)
+    pg = ProcessGranule(args, dem_parameters, dem_file, dem_name)
     pg.process_granule(local_file)
