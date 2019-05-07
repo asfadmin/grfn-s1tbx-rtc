@@ -9,6 +9,8 @@
     "NED2": "60m",
     "SRTMGL1": "30m",
     "SRTMGL3": "90m",
+    "SRTM 1Sec Hgt": "30",
+    "SRTM 3Sec": "90m",
 } %}
 {% set product_descriptions = {
     "SLC": "Single-Look Complex",
