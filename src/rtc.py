@@ -253,6 +253,7 @@ if __name__ == "__main__":
     parser.add_argument("--layover", "-l", dest="has_layover", action="store_true", help="Include layover shadow mask in ouput")
     parser.add_argument("--incidence_angle", "-i", dest="has_incidence_angle", action="store_true", help="Include projected local incidence angle in ouput")
     parser.add_argument("--clean", "-c", dest="clean", action="store_true", help="Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90.")
+    parser.add_argument("--dem", "-d", type=str, choices=['SRTM 1Sec HGT','SRTM 3Sec'], help="Override automatic DEM selection")
     args = parser.parse_args()
 
     if not args.username:
@@ -265,14 +266,19 @@ if __name__ == "__main__":
     if metadata is None:
         print(f"\nERROR: Either {args.granule} does exist or it is not a GRD/SLC product.")
         exit(1)
-    
+
     if metadata["bounding_box"]["lon_min"] < -170 and metadata["bounding_box"]["lon_max"] > 170:
         print(f"\nERROR: Granules crossing the antimeridian are not supported.")
         exit(1)
 
     write_netrc_file(args.username, args.password)
     local_file = download_file(metadata["download_url"])
-    dem_file = get_dem_file(metadata["bounding_box"])
     
+    if not args.dem:
+        dem_file = get_dem_file(metadata["bounding_box"])
+    else:
+        dem_file = args.dem
+
     pg = ProcessGranule(args, dem_file)
     pg.process_granule(local_file)
+
