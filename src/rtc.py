@@ -144,17 +144,20 @@ def gpt(input_file, command, *args, dem_parameters=None, cleanup_flag=True):
 
 class ProcessGranule():
 
-    def __init__(self, args, dem_parameters, dem_file, dem_name):
+    def __init__(self, args, dem_name, dem_file=None):
         self.granule = args.granule
         self.has_layover = args.has_layover
         self.has_incidence_angle = args.has_incidence_angle
         self.clean = args.clean
-        self.dem_parameters = dem_parameters
         self.dem_file = dem_file
         self.dem_name = dem_name
         self.projection = "AUTO:42001"
-
         self.output_dir = f"/output"
+
+        if self.dem_file:
+            self.dem_parameters = ["-PdemName='External DEM'", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767"]
+        else:
+            self.dem_parameters = [f"-PdemName={self.dem_name}"]
 
     def process_granule(self, local_file):
         local_file = gpt(local_file, "Apply-Orbit-File")
@@ -279,11 +282,9 @@ if __name__ == "__main__":
     if args.demName == "ASF":
         dem_name = get_dem_file(metadata["bounding_box"])
         dem_file = dem_name
-        dem_parameters = ["-PdemName='External DEM'", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767"]
     else:
         dem_name = args.demName
         dem_file = None
-        dem_parameters = [f"-PdemName={args.demName}"]
 
-    pg = ProcessGranule(args, dem_parameters, dem_file, dem_name)
+    pg = ProcessGranule(args, dem_name, dem_file)
     pg.process_granule(local_file)
