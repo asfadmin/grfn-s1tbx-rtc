@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/local/bin/python3
 
 import os
 import subprocess
@@ -131,9 +131,11 @@ def cleanup(input_file):
         rmtree(data_dir)
 
 
-def gpt(input_file, command, *args, cleanup_flag=True):
+def gpt(input_file, command, *args, dem_parameters=None, cleanup_flag=True):
     print(f"\n{command}")
-    system_command = ["gpt", command, f"-Ssource={input_file}", "-t", command] + list(args)
+    if dem_parameters is None:
+        dem_parameters = []
+    system_command = ["gpt", command, f"-Ssource={input_file}", "-t", command] + list(args) + dem_parameters
     system_call(system_command)
     if cleanup_flag:
         cleanup(input_file)
@@ -142,12 +144,14 @@ def gpt(input_file, command, *args, cleanup_flag=True):
 
 class ProcessGranule():
 
-    def __init__(self, args, dem_file):
+    def __init__(self, args, dem_parameters, dem_file, cleandem):
         self.granule = args.granule
         self.has_layover = args.has_layover
         self.has_incidence_angle = args.has_incidence_angle
         self.clean = args.clean
+        self.dem_parameters = dem_parameters
         self.dem_file = dem_file
+        self.cleandem = cleandem
         self.projection = "AUTO:42001"
 
         self.output_dir = f"/output"
@@ -163,17 +167,15 @@ class ProcessGranule():
 
         local_file = gpt(local_file, "Speckle-Filter")
         local_file = gpt(local_file, "Multilook", f"-PnRgLooks={range_looks}", "-PnAzLooks=3")
-        terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767")
-
+        terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", dem_parameters=self.dem_parameters)
         if self.has_layover:
-            local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
-            local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={self.projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
-                             "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767")
-            self._process_img_files(local_file)
-
-        local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={self.projection}", f"-PsaveProjectedLocalIncidenceAngle={self.has_incidence_angle}", "-PdemName=External DEM",
-                         f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
-        cleanup(self.dem_file)
+            local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PsaveLayoverShadowMask=true", dem_parameters=self.dem_parameters, cleanup_flag=False)
+            local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={self.projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", dem_parameters=self.dem_parameters)
+        
+        local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={self.projection}", f"-PsaveProjectedLocalIncidenceAngle={args.has_incidence_angle}", dem_parameters=self.dem_parameters)
+         
+        if self.cleandem:
+            cleanup(self.dem_file)
         self._process_img_files(local_file)
         self._create_arcgis_xml()
 
@@ -216,6 +218,7 @@ class ProcessGranule():
             output_file = f"{tif_file}.xml"
             print(f"\nPreparing arcgis xml file {output_file}.")
 
+
             groups = re.match(f"{self.output_dir}/{self.granule}_(.*)_RTC.tif", tif_file)
             data = {
                 "now": datetime.utcnow(),
@@ -251,10 +254,10 @@ if __name__ == "__main__":
     parser.add_argument("--username", "-u", type=str, help="Earthdata Login username")
     parser.add_argument("--password", "-p", type=str, help="Earthdata Login password")
     parser.add_argument("--layover", "-l", dest="has_layover", action="store_true", help="Include layover shadow mask in ouput")
-    parser.add_argument("--incidence_angle", "-i", dest="has_incidence_angle", action="store_true", help="Include projected local incidence angle in ouput")
+    parser.add_argument("--incidenceAngle", "-i", dest="has_incidence_angle", action="store_true", help="Include projected local incidence angle in ouput")
     parser.add_argument("--clean", "-c", dest="clean", action="store_true", help="Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90.")
+    parser.add_argument("--demName", "-d", type=str, help="The Digital Elevation Model. Default: %(default)s", choices=["ASF", "SRTM 1Sec Hgt", "SRTM 3Sec"], default="ASF")
     args = parser.parse_args()
-
     if not args.username:
         args.username = input("\nEarthdata Login username: ")
 
@@ -265,14 +268,22 @@ if __name__ == "__main__":
     if metadata is None:
         print(f"\nERROR: Either {args.granule} does exist or it is not a GRD/SLC product.")
         exit(1)
-    
+
     if metadata["bounding_box"]["lon_min"] < -170 and metadata["bounding_box"]["lon_max"] > 170:
         print(f"\nERROR: Granules crossing the antimeridian are not supported.")
         exit(1)
 
     write_netrc_file(args.username, args.password)
     local_file = download_file(metadata["download_url"])
-    dem_file = get_dem_file(metadata["bounding_box"])
-    
-    pg = ProcessGranule(args, dem_file)
+
+    if args.demName == "ASF":
+        cleandem = True
+        dem_file = get_dem_file(metadata["bounding_box"])
+        dem_parameters = ["-PdemName='External DEM'", f"-PexternalDEMFile={dem_file}", "-PexternalDEMNoDataValue=-32767"]
+    else:
+        cleandem = False
+        dem_file = args.demName
+        dem_parameters = [f"-PdemName={args.demName}"]
+
+    pg = ProcessGranule(args, dem_parameters, dem_file, cleandem)
     pg.process_granule(local_file)
