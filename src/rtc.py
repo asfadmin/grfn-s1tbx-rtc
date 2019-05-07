@@ -171,7 +171,7 @@ class ProcessGranule():
             local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PsaveLayoverShadowMask=true", dem_parameters=self.dem_parameters, cleanup_flag=False)
             local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={self.projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", dem_parameters=self.dem_parameters)
 
-        local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={self.projection}", f"-PsaveProjectedLocalIncidenceAngle={args.has_incidence_angle}", dem_parameters=self.dem_parameters)
+        local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={self.projection}", f"-PsaveProjectedLocalIncidenceAngle={self.has_incidence_angle}", dem_parameters=self.dem_parameters)
         
         if self.dem_file:
             cleanup(self.dem_file)
