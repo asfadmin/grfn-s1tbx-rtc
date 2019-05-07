@@ -5,4 +5,5 @@ echo
 read -p "Granule: " GRANULE
 docker run -it --cpus=0 --memory 16g -v $(pwd):/output --rm asfdaac/s1tbx-rtc --granule $GRANULE
 echo
-read -p "Press any key to continue"
+read -n1 -s -r -p "Press any key to continue"
+echo
