@@ -1,3 +1,4 @@
+#!/bin/bash
 echo Checking for updates
 docker pull asfdaac/s1tbx-rtc
 echo
