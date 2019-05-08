@@ -21,8 +21,9 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 
 1. Open Docker by clicking on the *cargo whale* in the toolbar.
 1. Click `Preferences`
-1. Click `Advanced` and allocate the correct RAM and CPU to Docker. A good rule is to use about 3/4 of the maximum.
-![advanced](https://docs.docker.com/docker-for-mac/images/menu/prefs-advanced.png)
+1. Click `Advanced` and allocate the correct RAM and CPU to Docker. A good starting rule is to use about 3/4 of the maximum. Values can be increased as needed though doing so could impact other running programs.
+  
+ ![advanced](https://docs.docker.com/docker-for-mac/images/menu/prefs-advanced.png)
 
 ## Usage
 
