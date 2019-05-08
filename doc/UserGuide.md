@@ -24,4 +24,5 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 1. Double click the `s1tbx-rtc.bat` script to run it
    1. If prompted with "Windows protected your PC", click **More info**, then **Run Anyway**
 1. Provide your granule name, Earthdata Login username, and Earthdata Login password
+   1. If prompted with "Docker Desktop - Share Drive", click **Share it**
 1. Processing can take up to several hours depending on the granule, internet connection, and computer resources
