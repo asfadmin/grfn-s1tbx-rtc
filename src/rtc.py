@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+#!/usr/bin/env python3
 
 import os
 import subprocess
@@ -131,11 +131,9 @@ def cleanup(input_file):
         rmtree(data_dir)
 
 
-def gpt(input_file, command, *args, dem_parameters=None, cleanup_flag=True):
+def gpt(input_file, command, *args, cleanup_flag=True):
     print(f"\n{command}")
-    if dem_parameters is None:
-        dem_parameters = []
-    system_command = ["gpt", command, f"-Ssource={input_file}", "-t", command] + list(args) + dem_parameters
+    system_command = ["gpt", command, f"-Ssource={input_file}", "-t", command] + list(args)
     system_call(system_command)
     if cleanup_flag:
         cleanup(input_file)
@@ -170,14 +168,15 @@ class ProcessGranule():
 
         local_file = gpt(local_file, "Speckle-Filter")
         local_file = gpt(local_file, "Multilook", f"-PnRgLooks={range_looks}", "-PnAzLooks=3")
-        terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", dem_parameters=self.dem_parameters)
+        terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767")
+
         if self.has_layover:
             local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PsaveLayoverShadowMask=true", dem_parameters=self.dem_parameters, cleanup_flag=False)
             local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={self.projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", dem_parameters=self.dem_parameters)
             self._process_img_files(local_file)
 
         local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={self.projection}", f"-PsaveProjectedLocalIncidenceAngle={self.has_incidence_angle}", dem_parameters=self.dem_parameters)
-         
+
         if self.dem_file:
             cleanup(self.dem_file)
         self._process_img_files(local_file)
@@ -257,10 +256,11 @@ if __name__ == "__main__":
     parser.add_argument("--username", "-u", type=str, help="Earthdata Login username")
     parser.add_argument("--password", "-p", type=str, help="Earthdata Login password")
     parser.add_argument("--layover", "-l", dest="has_layover", action="store_true", help="Include layover shadow mask in ouput")
-    parser.add_argument("--incidenceAngle", "-i", dest="has_incidence_angle", action="store_true", help="Include projected local incidence angle in ouput")
+    parser.add_argument("--incidence_angle", "-i", dest="has_incidence_angle", action="store_true", help="Include projected local incidence angle in ouput")
     parser.add_argument("--clean", "-c", dest="clean", action="store_true", help="Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90.")
     parser.add_argument("--demSource", "-d", type=str, help="Source for digital elevation models: Geoid-corrected NED/SRTM sourced from ASF, or SRTM sourced from ESA. Default %(default)s", choices=["ASF", "ESA"], default="ASF")
     args = parser.parse_args()
+
     if not args.username:
         args.username = input("\nEarthdata Login username: ")
 
