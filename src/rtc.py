@@ -142,15 +142,20 @@ def gpt(input_file, command, *args, cleanup_flag=True):
 
 class ProcessGranule():
 
-    def __init__(self, args, dem_file):
+    def __init__(self, args, dem_name, dem_file=None):
         self.granule = args.granule
         self.has_layover = args.has_layover
         self.has_incidence_angle = args.has_incidence_angle
         self.clean = args.clean
         self.dem_file = dem_file
+        self.dem_name = dem_name
         self.projection = "AUTO:42001"
-
         self.output_dir = f"/output"
+
+        if self.dem_file:
+            self.dem_parameters = ["-PdemName='External DEM'", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767"]
+        else:
+            self.dem_parameters = [f"-PdemName={self.dem_name}"]
 
     def process_granule(self, local_file):
         local_file = gpt(local_file, "Apply-Orbit-File")
@@ -166,14 +171,14 @@ class ProcessGranule():
         terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767")
 
         if self.has_layover:
-            local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767", "-PsaveLayoverShadowMask=true", cleanup_flag=False)
-            local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={self.projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask",
-                             "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767")
+            local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PsaveLayoverShadowMask=true", dem_parameters=self.dem_parameters, cleanup_flag=False)
+            local_file = gpt(local_file, "Terrain-Correction", f"-PmapProjection={self.projection}", "-PimgResamplingMethod=NEAREST_NEIGHBOUR", "-PpixelSpacingInMeter=30.0", "-PsourceBands=layover_shadow_mask", dem_parameters=self.dem_parameters)
             self._process_img_files(local_file)
 
-        local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={self.projection}", f"-PsaveProjectedLocalIncidenceAngle={self.has_incidence_angle}", "-PdemName=External DEM",
-                         f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767", cleanup_flag=True)
-        cleanup(self.dem_file)
+        local_file = gpt(terrain_flattening_file, "Terrain-Correction", "-PpixelSpacingInMeter=30.0", f"-PmapProjection={self.projection}", f"-PsaveProjectedLocalIncidenceAngle={self.has_incidence_angle}", dem_parameters=self.dem_parameters)
+
+        if self.dem_file:
+            cleanup(self.dem_file)
         self._process_img_files(local_file)
         self._create_arcgis_xml()
 
@@ -221,7 +226,7 @@ class ProcessGranule():
                 "now": datetime.utcnow(),
                 "polarization": groups[1],
                 "input_granule": self.granule,
-                "dem_name": self.dem_file,
+                "dem_name": self.dem_name,
             }
 
             template = self._get_xml_template()
@@ -253,6 +258,7 @@ if __name__ == "__main__":
     parser.add_argument("--layover", "-l", dest="has_layover", action="store_true", help="Include layover shadow mask in ouput")
     parser.add_argument("--incidence_angle", "-i", dest="has_incidence_angle", action="store_true", help="Include projected local incidence angle in ouput")
     parser.add_argument("--clean", "-c", dest="clean", action="store_true", help="Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90.")
+    parser.add_argument("--demSource", "-d", type=str, help="Source for digital elevation models: Geoid-corrected NED/SRTM sourced from ASF, or SRTM sourced from ESA. Default %(default)s", choices=["ASF", "ESA"], default="ASF")
     args = parser.parse_args()
 
     if not args.username:
@@ -265,14 +271,20 @@ if __name__ == "__main__":
     if metadata is None:
         print(f"\nERROR: Either {args.granule} does exist or it is not a GRD/SLC product.")
         exit(1)
-    
+
     if metadata["bounding_box"]["lon_min"] < -170 and metadata["bounding_box"]["lon_max"] > 170:
         print(f"\nERROR: Granules crossing the antimeridian are not supported.")
         exit(1)
 
     write_netrc_file(args.username, args.password)
     local_file = download_file(metadata["download_url"])
-    dem_file = get_dem_file(metadata["bounding_box"])
-    
-    pg = ProcessGranule(args, dem_file)
+
+    if args.demSource == "ASF":
+        dem_name = get_dem_file(metadata["bounding_box"])
+        dem_file = dem_name
+    else:
+        dem_name = 'SRTM 1Sec Hgt'
+        dem_file = None
+
+    pg = ProcessGranule(args, dem_name, dem_file)
     pg.process_granule(local_file)
