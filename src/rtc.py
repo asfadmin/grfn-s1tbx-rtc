@@ -259,7 +259,7 @@ if __name__ == "__main__":
     parser.add_argument("--layover", "-l", dest="has_layover", action="store_true", help="Include layover shadow mask in ouput")
     parser.add_argument("--incidenceAngle", "-i", dest="has_incidence_angle", action="store_true", help="Include projected local incidence angle in ouput")
     parser.add_argument("--clean", "-c", dest="clean", action="store_true", help="Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90.")
-    parser.add_argument("--demSource", "-d", type=str, help="Source for digital elevation models: NED/SRTM sourced from ASF, or SRTM sourced from ESA. Default %(default)s", choices=["ASF", "ESA"], default="ASF")
+    parser.add_argument("--demSource", "-d", type=str, help="Source for digital elevation models: Geoid-corrected NED/SRTM sourced from ASF, or SRTM sourced from ESA. Default %(default)s", choices=["ASF", "ESA"], default="ASF")
     args = parser.parse_args()
     if not args.username:
         args.username = input("\nEarthdata Login username: ")
