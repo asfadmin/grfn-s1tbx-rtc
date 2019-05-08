@@ -30,7 +30,7 @@ COLLECTION_IDS = [
     "C1327985740-ASF",  # SENTINEL-1B_SINGLE_POL_GRD_MEDIUM_RES
     "C1327985661-ASF",  # SENTINEL-1B_SLC
 ]
-USER_AGENT = "asfdaac/s1tbx-rtc"
+USER_AGENT = "python3 asfdaac/s1tbx-rtc"
 
 
 # Metadata
