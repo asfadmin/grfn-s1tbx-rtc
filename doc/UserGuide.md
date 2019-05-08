@@ -21,7 +21,7 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 1. Find the name of the GRD or SLC granule to process from [Vertex](https://vertex.daac.asf.alaska.edu/)
 1. [Start Docker Desktop for Windows](https://docs.docker.com/docker-for-windows/install/#install-docker-desktop-for-windows-desktop-app#start-docker-desktop-for-windows)
 1. Download the [s1tbx-rtc.bat](https://s3.amazonaws.com/asfdaac/s1tbx-rtc.bat) script to the directory where RTC products should be saved
-1. Run the s1tbx-rtc.bat script
-   1. If prompted with "Windows protected your PC", click "More info", then "Run Anyway"
+1. Double click the `s1tbx-rtc.bat` script to run it
+   1. If prompted with "Windows protected your PC", click **More info**, then **Run Anyway**
 1. Provide your granule name, Earthdata Login username, and Earthdata Login password
-1. Processing can take up to several hours depending on the granule, internet connection, and computer resources.
+1. Processing can take up to several hours depending on the granule, internet connection, and computer resources
