@@ -166,7 +166,7 @@ class ProcessGranule():
             range_looks = 12
             local_file = gpt(local_file, "TOPSAR-Deburst")
 
-        local_file = gpt(local_file, "Speckle-Filter")
+        local_file = gpt(local_file, "Speckle-Filter", "-Pfilter=Lee Sigma")
         local_file = gpt(local_file, "Multilook", f"-PnRgLooks={range_looks}", "-PnAzLooks=3")
         terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767")
 
