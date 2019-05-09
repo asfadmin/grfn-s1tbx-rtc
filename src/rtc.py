@@ -170,7 +170,7 @@ class ProcessGranule():
 
         local_file = gpt(local_file, "Speckle-Filter", "-Pfilter=Lee Sigma")
         local_file = gpt(local_file, "Multilook", f"-PnRgLooks={range_looks}", "-PnAzLooks=3")
-        terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", "-PdemName=External DEM", f"-PexternalDEMFile={self.dem_file}", "-PexternalDEMNoDataValue=-32767")
+        terrain_flattening_file = gpt(local_file, "Terrain-Flattening", "-PreGridMethod=False", dem_parameters=self.dem_parameters)
 
         if self.has_layover:
             local_file = gpt(terrain_flattening_file, "SAR-Simulation", "-PsaveLayoverShadowMask=true", dem_parameters=self.dem_parameters, cleanup_flag=False)
