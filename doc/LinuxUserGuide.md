@@ -18,7 +18,7 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
    `sudo apt-get update`<br>
    `sudo apt-get install docker docker.io -y`
 1. Add your user to the docker group<br>
-  `sudo usermod -aG docker ubuntu`
+  `sudo usermod -aG docker $USER`
 1. Log out and log back in for the group change to take effect
 1. To verify everything is working run the docker command <br>
   `docker run hello-world`<br>
