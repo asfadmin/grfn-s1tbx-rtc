@@ -14,7 +14,7 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 
 ## Installation
 Ubuntu 18.04
-1. Install docker using apt<br>
+1. Install Docker using apt<br>
    `sudo apt-get update`<br>
    `sudo apt-get install docker docker.io -y`
 1. Add your user to the docker group<br>
