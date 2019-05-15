@@ -26,16 +26,19 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
  `Hello from Docker!`<br>
   `This message shows that your installation appears to be working correctly.`
 ### Centos 7
-1. install docker: 
+1. Install docker:<br>
 `sudo yum install docker-engine -y`
-1. create a docker group and add a user to it (replace USERNAME with your username):
-` sudo groupadd docker && sudo usermod -aG docker USERNAME`
-1. restart the machine:
-`sudo shutdown -r now`
-1. start docker
+1. Create a docker group and add your user to it<br>
+`sudo groupadd docker && sudo usermod -aG docker $USER`
+1. Log out and log back in for the group change to take effect
+1. start docker<br>
 `sudo service docker start`
-1. verify that docker is running:
-`docker run hello-world`
+1. Log out and log back in for the group change to take effect
+1. To verify everything is working run the docker command <br>
+  `docker run hello-world`<br>
+ Confirm you see the following in your output<br>
+ `Hello from Docker!`<br>
+  `This message shows that your installation appears to be working correctly.``
 
 ### Other Linux Verisons
 1. Follow the [Install Docker on linux](https://docs.docker.com/v17.12/install/) instructions
