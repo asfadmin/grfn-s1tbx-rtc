@@ -19,7 +19,7 @@ Ubuntu 16.04
 1. install docker: 
  `sudo apt-get install docker docker.io -y`
 1. create a docker group and add a user to it:
-`sudo groupadd docker && sudo usermod -aG docker ubuntu`
+`sudo usermod -aG docker ubuntu`
 1. restart the machine:
 `sudo shutdown -r now`
 1. start docker
