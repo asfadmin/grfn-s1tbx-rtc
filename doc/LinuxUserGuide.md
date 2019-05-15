@@ -43,7 +43,7 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 
 1. Install Docker
    ```
-   sudo yum install -y docker-engine
+   sudo yum install -y docker docker.io
    ```
 1. Create a docker group and add your user to it
    ```
