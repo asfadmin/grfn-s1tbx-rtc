@@ -18,7 +18,7 @@ Ubuntu 18.04
 `sudo apt-get update`
 1. install docker: 
  `sudo apt-get install docker docker.io -y`
-1. create a docker group and add a user to it:
+1. add a user to the docker group:
 `sudo usermod -aG docker ubuntu`
 1. restart the machine:
 `sudo shutdown -r now`
