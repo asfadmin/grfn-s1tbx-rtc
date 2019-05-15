@@ -78,6 +78,9 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
    ```
 1. Execute **s1tbx-rtc.sh** with the granule name and desired options
    ```
-   ./s1tbx-rtc.sh --granule S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F
+   sh s1tbx-rtc.sh --granule S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F
    ```
    Processing can take up to several hours depending on the granule, internet connection, and computer resources
+1. Upon completion, RTC products will appear in the directory where **s1tbx-rtc.sh** was executed
+   ```
+   
