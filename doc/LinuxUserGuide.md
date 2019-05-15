@@ -21,8 +21,8 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
   `sudo usermod -aG docker ubuntu`
 1. Log out and log back in for the group change to take effect
 1. To verifty everything is working run the docker command <br>
-  `docker run hello-world`
-1. Confirm you see a hello from docker message<br>
+  `docker run hello-world`<br>
+ Confirm you see a hello from docker message<br>
  `Hello from Docker!`<br>
   `This message shows that your installation appears to be working correctly.`
 ### Centos 7
