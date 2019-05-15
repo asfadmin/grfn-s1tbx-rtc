@@ -6,8 +6,8 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 
 ## System Requirements
 
-* a 64-bit installation
-* kernel at 3.10 or newer
+* 64-bit installation
+* Kernel at 3.10 or newer
 * Ubuntu, Debian, Redhat or CentOS
 * 16 GB of RAM
 * 20 GB of available hard disk space
