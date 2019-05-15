@@ -22,7 +22,7 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 1. Log out and log back in for the group change to take effect
 1. To verifty everything is working run the docker command <br>
   `docker run hello-world`<br>
- Confirm you see a hello from docker message<br>
+ Confirm you see the following in your output<br>
  `Hello from Docker!`<br>
   `This message shows that your installation appears to be working correctly.`
 ### Centos 7
