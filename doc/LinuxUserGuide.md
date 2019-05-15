@@ -35,7 +35,7 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
    Hello from Docker!
    This message shows that your installation appears to be working correctly.
    ```
-1. Download the script to the directory where RTC products should be saved
+1. Download s1tbx-rtc.sh to the directory where RTC products should be saved
    ```
    wget https://s3.amazonaws.com/asfdaac/linux-s1tbx-rtc.sh
    ```
@@ -64,9 +64,9 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
    Hello from Docker!
    This message shows that your installation appears to be working correctly.
    ```
-1. Download the script to the directory where RTC products should be saved
+1. Download s1tbx-rtc.sh to the directory where RTC products should be saved
    ```
-   wget https://s3.amazonaws.com/asfdaac/linux-s1tbx-rtc.sh
+   wget https://s3.amazonaws.com/asfdaac/s1tbx-rtc.sh
    ```
 
 
@@ -76,7 +76,7 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
    ```
    S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F
    ```
-1. Execute the s1tbx-rtc wrapper with granule name and desired options
+1. Execute s1tbx-rtc.sh with granule name and desired options
    ```
    ./linux-s1tbx-rtc.sh -g S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F
    ```
