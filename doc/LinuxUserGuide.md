@@ -13,7 +13,7 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 * 20 GB of available hard disk space
 
 ## Installation
-Ubuntu 18.04
+###Ubuntu 18.04
 1. Install Docker using apt<br>
    `sudo apt-get update`<br>
    `sudo apt-get install docker docker.io -y`
@@ -23,7 +23,7 @@ Ubuntu 18.04
 1. Verify that docker is running<br>
   `docker run hello-world`
 
-Centos 7
+###Centos 7
 1. install docker: 
 `sudo yum install docker-engine -y`
 1. create a docker group and add a user to it (replace USERNAME with your username):
@@ -35,7 +35,7 @@ Centos 7
 1. verify that docker is running:
 `docker run hello-world`
 
-Other Linux Verisons
+###Other Linux Verisons
 1. Follow the [Install Docker on linux](https://docs.docker.com/v17.12/install/) instructions
 
 ## Usage
