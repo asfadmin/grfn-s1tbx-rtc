@@ -35,8 +35,10 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
    Hello from Docker!
    This message shows that your installation appears to be working correctly.
    ```
-  1. Download the script to the directory where RTC products should be saved<br>
-  `wget https://s3.amazonaws.com/asfdaac/linux-s1tbx-rtc.sh`
+  1. Download the script to the directory where RTC products should be saved
+  ```
+  wget https://s3.amazonaws.com/asfdaac/linux-s1tbx-rtc.sh
+  ```
 ### CentOS 7
 
 1. Install Docker
