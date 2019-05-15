@@ -66,7 +66,7 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
    ```
 1. Download **s1tbx-rtc.sh** to the directory where RTC products should be saved
    ```
-   wget https://s3.amazonaws.com/asfdaac/s1tbx-rtc.sh
+   wget wget https://raw.githubusercontent.com/asfadmin/grfn-s1tbx-rtc/master/scripts/s1tbx-rtc.sh
    ```
 
 
