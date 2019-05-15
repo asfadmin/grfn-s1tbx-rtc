@@ -37,7 +37,7 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
   `docker run hello-world`<br>
  Confirm you see the following in your output<br>
  `Hello from Docker!`<br>
-  `This message shows that your installation appears to be working correctly.``
+  `This message shows that your installation appears to be working correctly.`
 
 ### Other Linux Verisons
 1. Follow the [Install Docker on linux](https://docs.docker.com/v17.12/install/) instructions
