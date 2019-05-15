@@ -37,7 +37,7 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
    ```
 1. Download **s1tbx-rtc.sh** to the directory where RTC products should be saved
    ```
-   wget https://s3.amazonaws.com/asfdaac/linux-s1tbx-rtc.sh
+   wget https://s3.amazonaws.com/asfdaac/s1tbx-rtc.sh
    ```
 ### CentOS 7
 
@@ -83,4 +83,5 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
    Processing can take up to several hours depending on the granule, internet connection, and computer resources
 1. Upon completion, RTC products will appear in the directory where **s1tbx-rtc.sh** was executed
    ```
+   
    
