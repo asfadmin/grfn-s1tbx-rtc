@@ -36,7 +36,7 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
    This message shows that your installation appears to be working correctly.
    ```
 
-### Centos 7
+### CentOS 7
 
 1. Install Docker
    ```
