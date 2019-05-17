@@ -72,10 +72,7 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 
 ## Usage
 
-1. Find the name of the GRD or SLC granule to process from [Vertex](https://vertex.daac.asf.alaska.edu/)
-   ```
-   S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F
-   ```
+1. Find the name of the GRD or SLC granule to process from [Vertex](https://vertex.daac.asf.alaska.edu/). For this example we have selected *S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F*.
 1. Execute **s1tbx-rtc.sh** with the granule name and desired options
    ```
    sh s1tbx-rtc.sh --granule S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F
