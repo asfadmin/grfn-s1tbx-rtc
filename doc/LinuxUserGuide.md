@@ -4,6 +4,15 @@
 
 Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-looking nature of SAR sensors and are compounded by rugged terrain. Terrain correction corrects geometric distortions that lead to geolocation errors by moving image pixels into the proper spatial relationship with each other based on a Digital Elevation Model (DEM). Radiometric correction removes the misleading influence of topography on backscatter values. Radiometric Terrain Correction (RTC) combines both corrections to produce a superior product for science applications.
 
+
+## Output Products
+- GeoTIFF image format
+- 30 meter pixel spacing
+- Pixel values indicate gamma-0 power
+- Projected in Universal Transverse Mercator (UTM) coordinates
+- ArcGIS compatible ISO 19115 metadata
+
+
 ## System Requirements
 
 * Ubuntu or CentOS Linux
@@ -95,11 +104,4 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 | --cleans |Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90 (3/13/2018). May adversely affect valid data  | 
 | --demSource |Source for digital elevation models: Geoid-corrected NED/SRTM sourced from ASF, or SRTM sourced from ESA. Default ASF |
 
-
-## Output Products
-- GeoTIFF image format
-- 30 meter pixel spacing
-- Pixel values indicate gamma-0 power
-- Projected in Universal Transverse Mercator (UTM) coordinates
-- ArcGIS compatible ISO 19115 metadata
 
