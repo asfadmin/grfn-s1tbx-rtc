@@ -85,5 +85,12 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
    S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F_VV_RTC.tif
    S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F_VV_RTC.tif.xml
    ```
+   ## Additional Options
    
-   
+
+| Option                 | Description   | 
+|:---------------------- |:-------------| 
+| --layover| Include layover shadow mask in output | 
+| --incidenceAngle | Include projected local incidence angle in output     | 
+| --cleans |Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90 (3/13/2018). May adversely affect valid data  | 
+| --demSource |Source for digital elevation models: Geoid-corrected NED/SRTM sourced from ASF, or SRTM sourced from ESA. Default ASF |
