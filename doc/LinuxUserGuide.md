@@ -101,6 +101,9 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 
 | Option                 | Description   | 
 |:---------------------- |:-------------| 
+| --granule | Sentinel-1 granule name |
+| --username | Earthdata Login username |
+| --password | Earthdata Login password |
 | --layover| Include layover shadow mask in output | 
 | --incidenceAngle | Include projected local incidence angle in output     | 
 | --clean |Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90 (3/13/2018). May adversely affect valid data  | 
