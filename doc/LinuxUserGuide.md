@@ -81,7 +81,9 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 
 ## Usage
 
-1. Find the name of the GRD or SLC granule to process from [Vertex](https://vertex.daac.asf.alaska.edu/). For this example we have selected *S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F*.
+1. Find the name of the GRD or SLC granule to process from [Vertex](https://vertex.daac.asf.alaska.edu/).
+   
+   *The examples below use S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F*.
 1. Execute **s1tbx-rtc.sh** with the granule name and desired options
    ```
    sh s1tbx-rtc.sh --granule S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F
@@ -101,7 +103,7 @@ Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-lo
 |:---------------------- |:-------------| 
 | --layover| Include layover shadow mask in output | 
 | --incidenceAngle | Include projected local incidence angle in output     | 
-| --cleans |Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90 (3/13/2018). May adversely affect valid data  | 
+| --clean |Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90 (3/13/2018). May adversely affect valid data  | 
 | --demSource |Source for digital elevation models: Geoid-corrected NED/SRTM sourced from ASF, or SRTM sourced from ESA. Default ASF |
 
 
