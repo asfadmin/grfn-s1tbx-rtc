@@ -2,15 +2,15 @@
 
 ## Background
 
-The Alaska Satellite Facility (ASF) developed an advanced product toolbox (TBX) capable of conducting Radiometric Terrain Correction (RTC) with Sentinal-1 data named S-1TBX RTC. It provides automated fetching of data from ASF's datapool with Digital Elevation Map (DEM) selection and stitching. It bundles the European Space Agency's Sential-1 Application Platform (SNAP) toolbox with a recipe for processing RTC products from start to finish. This allows users to begin with a single granule name and in one command produce RTC analysis ready sentinel-1 end products.
+The Alaska Satellite Facility (ASF) has developed an advanced product toolbox (TBX) capable of conducting Radiometric Terrain Correction (RTC) with Sentinel-1 data named S-1TBX RTC. The toolbox provides automated fetching of data from ASF's datapool (https://vertex.daac.asf.alaska.edu), Digital Elevation Map (DEM) selection and stitching, and bundles the European Space Agency's Sentinel-1 Application Platform (SNAP) toolbox with a recipe for processing RTC products from start to finish. This allows users to begin with a single granule name and in one command produce RTC analysis ready Sentinel-1 end products.
 
 Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-looking nature of SAR sensors and are compounded by rugged terrain. RTC corrects geometric distortions that lead to geolocation errors by moving image pixels into the proper spatial relationship with one another based on a DEM. RTC removes the misleading influence of topography and backscatter values, combining both corrections to produce a superior product for science application and analysis.
 
 ## Output Products
-- GeoTIFF image format
-- 30 meter pixel spacing
-- Pixel values indicate gamma-0 power
-- Projected in Universal Transverse Mercator (UTM) coordinates
+- GeoTIFF image with 
+    - 30 meter pixel spacing
+    - Pixel values indicate gamma-0 power
+    - Projected in Universal Transverse Mercator (UTM) coordinates
 - ArcGIS compatible ISO 19115 metadata
 
 
