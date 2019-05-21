@@ -4,7 +4,7 @@
 
 Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-looking nature of SAR sensors and are compounded by rugged terrain. Terrain correction corrects geometric distortions that lead to geolocation errors by moving image pixels into the proper spatial relationship with each other based on a Digital Elevation Model (DEM). Radiometric correction removes the misleading influence of topography on backscatter values. Radiometric Terrain Correction (RTC) combines both corrections to produce a superior product for science applications.
 
-The s1tbx-rtc tool provides automated fetching of data from ASF's datapool with DEM selection and stitching. It bundles in the SNAP Sentinel-1 toolbox and provides a recipe for processing RTC products from start to finish. This allows users to start with only a granule name and in one command have radiometric terrain corrected analysis ready sentinel-1 data.
+The S-1tbx-rtc tool provides automated fetching of data from ASF's datapool with DEM selection and stitching. It bundles in the SNAP Sentinel-1 toolbox and provides a recipe for processing RTC products from start to finish. This allows users to start with only a granule name and in one command have radiometric terrain corrected analysis ready sentinel-1 data.
 
 ## Output Products
 - GeoTIFF image format
