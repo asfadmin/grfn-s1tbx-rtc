@@ -2,9 +2,9 @@
 
 ## Background
 
-The ASF Advanced Product Toolbox RTC Tool (S-1 Tbx RTC)  provides automated fetching of data from ASF's datapool with DEM selection and stitching. It bundles in the SNAP Sentinel-1 toolbox and provides a recipe for processing RTC products from start to finish. This allows users to start with only a granule name and in one command have radiometric terrain corrected analysis ready sentinel-1 data.
+The Alaska Satellite Facility (ASF) developed an advanced product toolbox (TBX) capable of conducting Radio Metric Terrain Correction (RTC) with Sentinal-1 data named S-1TBX RTC. It provides automated fetching of data from ASF's datapool with Digital Elevation Map (DEM) selection and stitching. It bundles the European Space Agency's Sential-1 Application Platform (SNAP) toolbox with a recipe for processing RTC products from start to finish. This allows users to begin with a single granule name and in one command produce RTC analysis ready sentinel-1 end products.
 
-Distortions in Synthetic-aperture radar (SAR) imagery are induced by the side-looking nature of SAR sensors and are compounded by rugged terrain. Terrain correction corrects geometric distortions that lead to geolocation errors by moving image pixels into the proper spatial relationship with each other based on a Digital Elevation Model (DEM). Radiometric correction removes the misleading influence of topography on backscatter values. Radiometric Terrain Correction (RTC) combines both corrections to produce a superior product for science applications.
+Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-looking nature of SAR sensors and are compounded by rugged terrain. RTC corrects geometric distortions that lead to geolocation errors by moving image pixels into the proper spatial relationship with one another based on a DEM. RTC removes the misleading influence of topography and backscatter values, combining both corrections to produce a superior product for science application and analysis.
 
 ## Output Products
 - GeoTIFF image format
