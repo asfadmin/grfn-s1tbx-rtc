@@ -84,18 +84,18 @@ Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-lo
 
 1. Find the name of the GRD or SLC granule to process from [Vertex](https://vertex.daac.asf.alaska.edu/).
    
-   *The examples below use S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F*.
+   *The examples below use S1B_IW_GRDH_1SDV_20190430T161529_20190430T161554_016038_01E295_771B*.
 1. Execute **s1tbx-rtc.sh** with the granule name and desired options
    ```
-   sh s1tbx-rtc.sh --granule S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F
+   sh s1tbx-rtc.sh --granule S1B_IW_GRDH_1SDV_20190430T161529_20190430T161554_016038_01E295_771B
    ```
    Processing can take up to several hours depending on the granule, internet connection, and computer resources
 1. Upon completion, RTC products will appear in the directory where **s1tbx-rtc.sh** was executed
    ```
-   S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F_VH_RTC.tif
-   S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F_VH_RTC.tif.xml
-   S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F_VV_RTC.tif
-   S1B_IW_GRDH_1SDV_20190512T161529_20190512T161554_016213_01E839_2D9F_VV_RTC.tif.xml
+   S1B_IW_GRDH_1SDV_20190430T161529_20190430T161554_016038_01E295_771B_VH_RTC.tif
+   S1B_IW_GRDH_1SDV_20190430T161529_20190430T161554_016038_01E295_771B_VH_RTC.tif.xml
+   S1B_IW_GRDH_1SDV_20190430T161529_20190430T161554_016038_01E295_771B_VV_RTC.tif
+   S1B_IW_GRDH_1SDV_20190430T161529_20190430T161554_016038_01E295_771B_VV_RTC.tif.xml
    ```
 ## Additional Options
 
