@@ -254,12 +254,12 @@ class ProcessGranule():
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Radiometric Terrain Correction using the SENTINEL-1 Toolbox")
-    parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 granule name", required=True)
-    parser.add_argument("--username", "-u", type=str, help="Earthdata Login username")
-    parser.add_argument("--password", "-p", type=str, help="Earthdata Login password")
-    parser.add_argument("--demSource", "-d", type=str, help="Source for digital elevation models: Geoid-corrected NED/SRTM sourced from ASF, or SRTM sourced from ESA. Default %(default)s", choices=["ASF", "ESA"], default="ASF")
-    parser.add_argument("--layover", "-l", dest="has_layover", action="store_true", help="Include layover shadow mask in output")
-    parser.add_argument("--incidenceAngle", "-i", dest="has_incidence_angle", action="store_true", help="Include projected local incidence angle in output")
+    parser.add_argument("--granule", "-g", type=str, help="Sentinel-1 granule name. SLC and GRD granules are supported.", required=True)
+    parser.add_argument("--username", "-u", type=str, help="Earthdata Login username.")
+    parser.add_argument("--password", "-p", type=str, help="Earthdata Login password.")
+    parser.add_argument("--demSource", "-d", type=str, help="Source for digital elevation models: Geoid-corrected NED/SRTM sourced from ASF, or SRTM sourced from ESA. The default is %(default)s.", choices=["ASF", "ESA"], default="ASF")
+    parser.add_argument("--layover", "-l", dest="has_layover", action="store_true", help="Include layover shadow mask in output.")
+    parser.add_argument("--incidenceAngle", "-i", dest="has_incidence_angle", action="store_true", help="Include projected local incidence angle in output.")
     parser.add_argument("--clean", "-c", dest="clean", action="store_true", help="Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90 (3/13/2018). May adversely affect valid data.")
     args = parser.parse_args()
 
