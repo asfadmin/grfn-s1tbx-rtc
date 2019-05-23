@@ -106,12 +106,12 @@ sh s1tbx-rtc.sh --granule GRANULE [--username USERNAME] [--password PASSWORD] [-
 
 | Option                 | Description   | 
 |:---------------------- |:-------------| 
-| --granule | Sentinel-1 granule name. SLC and GRD granules are supported |
-| --username | Earthdata Login username |
-| --password | Earthdata Login password |
-| --demSource |Source for digital elevation models: Geoid-corrected NED/SRTM sourced from ASF, or SRTM sourced from ESA. Default ASF |
-| --layover| Include layover shadow mask in output | 
-| --incidenceAngle | Include projected local incidence angle in output     | 
-| --clean |Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90 (3/13/2018). May adversely affect valid data  | 
+| --granule | Sentinel-1 granule name. SLC and GRD granules are supported. |
+| --username | Earthdata Login username. |
+| --password | Earthdata Login password. |
+| --demSource |Source for digital elevation models: Geoid-corrected NED/SRTM sourced from ASF, or SRTM sourced from ESA. The default is ASF. |
+| --layover| Include layover shadow mask in output. | 
+| --incidenceAngle | Include projected local incidence angle in output.     | 
+| --clean |Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90 (3/13/2018). May adversely affect valid data.  | 
 
 
