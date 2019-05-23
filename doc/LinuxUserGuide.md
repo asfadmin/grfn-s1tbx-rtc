@@ -106,7 +106,7 @@ sh s1tbx-rtc.sh --granule GRANULE [--username USERNAME] [--password PASSWORD] [-
 
 | Option                 | Description   | 
 |:---------------------- |:-------------| 
-| --granule | Sentinel-1 granule name |
+| --granule | Sentinel-1 granule name. SLC and GRD granules are supported |
 | --username | Earthdata Login username |
 | --password | Earthdata Login password |
 | --demSource |Source for digital elevation models: Geoid-corrected NED/SRTM sourced from ASF, or SRTM sourced from ESA. Default ASF |
