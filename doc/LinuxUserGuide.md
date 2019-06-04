@@ -13,7 +13,6 @@ Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-lo
     - Projected in Universal Transverse Mercator (UTM) coordinates
 - ArcGIS compatible ISO 19115 metadata
 
-
 ## System Requirements
 
 * Ubuntu or CentOS Linux
