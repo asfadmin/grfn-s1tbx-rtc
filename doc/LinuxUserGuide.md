@@ -48,6 +48,7 @@ Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-lo
    ```
    wget https://raw.githubusercontent.com/asfadmin/grfn-s1tbx-rtc/master/scripts/s1tbx-rtc.sh
    ```
+
 ### CentOS 7
 
 1. Install Docker
@@ -111,5 +112,3 @@ sh s1tbx-rtc.sh --granule GRANULE [--username USERNAME] [--password PASSWORD] [-
 | --layover| Include layover shadow mask in output. | 
 | --incidenceAngle | Include projected local incidence angle in output.     | 
 | --clean |Set very small pixel values to No Data. Helpful to clean edge artifacts of granules processed before IPF version 2.90 (3/13/2018). May adversely affect valid data.  | 
-
-
