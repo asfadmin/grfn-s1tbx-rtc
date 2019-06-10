@@ -78,6 +78,9 @@ Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-lo
    ```
    wget https://raw.githubusercontent.com/asfadmin/grfn-s1tbx-rtc/master/scripts/s1tbx-rtc.sh
    ```
+### OSX
+
+1. Download [Docker for OSX] https://download.docker.com/mac/stable/Docker.dmg
 
 ## Usage
 
