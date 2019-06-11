@@ -86,45 +86,32 @@ Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-lo
 
 1. Run the Docker for Mac installer by double clicking Docker.dmg, then drag Moby the whale to the Applications folder
 
-   ![](drag_and_drop.png)
+   <p align="center"><img src="drag_and_drop.png" width="75%"></p>
 
-1. Double-click Docker.app in the Applications folder to start Docker
+1. Double-click Docker.app in the Applications folder to start Docker.  This will take a few moments.  When complete, "Docker Desktop is now up and running!" should be displayed.
 
-   ![](applications_folder.png)
+   **Note:** A Docker ID is not required.
+
+   <p align="center"><img src="applications_folder.png" width="75%"></p>
    
-   Docker will take a few moments to start.  When complete, "Docker Desktop is now up and running!" should be displayed
-   
-   ![](docker_is_running.png)
-   
-   Note: A Docker ID is not required
+   <p align="center"><img src="docker_is_running.png" width="40%"></p>
 
 1. Click the Docker icon in the top status bar and select "Preferences"
 
-   ![](preferences.png)
+   <p align="center"><img src="preferences.png" width="30%"></p>
 
    1. Select "Advanced"
-   1. Set "CPUs" to ...
+   1. Set "CPUs" to 4 or higher
    1. Set "Memory" to 16.0 GiB or higher
-   1. Click "Apply & Restart"
+   1. Click "Apply & Restart" and wait for the green "Docker Engine is running" to reappear
    
-   ![](advanced_settings.png)
-
-1. Run the Terminal app to open a command line window
-
-1. To verify everything is working run the docker command
-   ```
-   docker run hello-world
-   ```
-   Confirm you see the following in your output
-   ```
-   Hello from Docker!
-   This message shows that your installation appears to be working correctly.
-   ```
+   <p align="center"><img src="advanced_settings.png" width="75%"></p>
 
 1. Download **s1tbx-rtc.sh** to the directory where RTC products should be saved
    ```
    curl https://raw.githubusercontent.com/asfadmin/grfn-s1tbx-rtc/master/scripts/s1tbx-rtc.sh -o s1tbx-rtc.sh
    ```
+
 ## Usage
 
 1. Find the name of the GRD or SLC granule to process from [Vertex](https://vertex.daac.asf.alaska.edu/).
