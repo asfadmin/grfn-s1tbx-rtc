@@ -86,7 +86,28 @@ Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-lo
 
 1. Run the Docker for Mac installer by double clicking Docker.dmg, then drag Moby the whale to the Applications folder
 
+   ![](drag_and_drop.png)
+
 1. Double-click Docker.app in the Applications folder to start Docker
+
+   ![](applications_folder.png)
+   
+   Docker will take a few moments to start.  When complete, "Docker Desktop is now up and running!" should be displayed
+   
+   ![](docker_is_running.png)
+   
+   Note: A Docker ID is not required
+
+1. Click the Docker icon in the top status bar and select "Preferences"
+
+   ![](preferences.png)
+
+   1. Select "Advanced"
+   1. Set "CPUs" to ...
+   1. Set "Memory" to 16.0 GiB or higher
+   1. Click "Apply & Restart"
+   
+   ![](advanced_settings.png)
 
 1. Run the Terminal app to open a command line window
 
