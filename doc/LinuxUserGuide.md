@@ -82,13 +82,13 @@ Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-lo
    ```
 ### macOS
 
-1. Download the [Docker for Mac](https://download.docker.com/mac/stable/Docker.dmg) installer
+1. Download the [Docker for Mac](https://download.docker.com/mac/stable/Docker.dmg) installer (~500 MB)
 
 1. Run the Docker for Mac installer by double clicking Docker.dmg, then drag Moby the whale to the Applications folder
 
 1. Double-click Docker.app in the Applications folder to start Docker
 
-1. Open a terminal window
+1. Run the Terminal app to open a command line window
 
 1. To verify everything is working run the docker command
    ```
