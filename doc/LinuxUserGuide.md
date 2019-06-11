@@ -107,21 +107,22 @@ Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-lo
    
    <p align="center"><img src="advanced_settings.png" width="75%"></p>
 
-1. Download **s1tbx-rtc.sh** to the directory where RTC products should be saved
-   ```
-   curl https://raw.githubusercontent.com/asfadmin/grfn-s1tbx-rtc/master/scripts/s1tbx-rtc.sh -o s1tbx-rtc.sh
-   ```
+1. Download [**s1tbx-rtc.sh**](https://asfdaac.s3.amazonaws.com/s1tbx-rtc.sh) to the directory where RTC products should be saved
 
 ## Usage
 
 1. Find the name of the GRD or SLC granule to process from [Vertex](https://vertex.daac.asf.alaska.edu/).
    
    *The examples below use S1B_IW_GRDH_1SDV_20190430T161529_20190430T161554_016038_01E295_771B*.
+
+1. **macOS only:** Run the Terminal app to open a command line window and navigate to the directory where **s1tbx-rtc.sh** is saved
+
 1. Execute **s1tbx-rtc.sh** with the granule name and desired options
    ```
    sh s1tbx-rtc.sh --granule S1B_IW_GRDH_1SDV_20190430T161529_20190430T161554_016038_01E295_771B
    ```
    Processing can take up to several hours depending on the granule, internet connection, and computer resources
+
 1. Upon completion, RTC products will appear in the directory where **s1tbx-rtc.sh** was executed
    ```
    S1B_IW_GRDH_1SDV_20190430T161529_20190430T161554_016038_01E295_771B_VH_RTC.tif
