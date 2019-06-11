@@ -86,26 +86,26 @@ Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-lo
 
 1. Run the Docker for Mac installer by double clicking Docker.dmg, then drag Moby the whale to the Applications folder
 
-   <p align="center"><img src="drag_and_drop.png" width="75%"></p>
+   <p align="center"><img src="images/drag_and_drop.png" width="75%"></p>
 
 1. Double-click Docker.app in the Applications folder to start Docker.  This will take a few moments.  When complete, "Docker Desktop is now up and running!" should be displayed.
 
    **Note:** A Docker ID is not required.
 
-   <p align="center"><img src="applications_folder.png" width="75%"></p>
+   <p align="center"><img src="images/applications_folder.png" width="75%"></p>
    
-   <p align="center"><img src="docker_is_running.png" width="40%"></p>
+   <p align="center"><img src="images/docker_is_running.png" width="40%"></p>
 
 1. Click the Docker icon in the top status bar and select "Preferences"
 
-   <p align="center"><img src="preferences.png" width="30%"></p>
+   <p align="center"><img src="images/preferences.png" width="30%"></p>
 
    1. Select "Advanced"
    1. Set "CPUs" to 4 or higher
    1. Set "Memory" to 16.0 GiB or higher
    1. Click "Apply & Restart" and wait for the green "Docker Engine is running" to reappear
    
-   <p align="center"><img src="advanced_settings.png" width="75%"></p>
+   <p align="center"><img src="images/advanced_settings.png" width="75%"></p>
 
 1. Download [**s1tbx-rtc.sh**](https://asfdaac.s3.amazonaws.com/s1tbx-rtc.sh) to the directory where RTC products should be saved
 
