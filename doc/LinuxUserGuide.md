@@ -120,9 +120,18 @@ Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-lo
    
    *The examples below use S1B_IW_GRDH_1SDV_20190430T161529_20190430T161554_016038_01E295_771B*.
 
-1. **macOS only:** Run the Terminal app to open a command line window and navigate to the directory where **s1tbx-rtc.sh** is saved
+1. **macOS only**
 
- <p align="center"><img src="images/terminal.png" width="75%"></p>
+   1. Open the Terminal app
+
+      <p align="center"><img src="images/terminal.png" width="75%"></p>
+   
+   1. In your Terminal window, navigate to the directory where **s1tbx-rtc.sh** is saved.
+   
+      *For example, if you saved the script to your Downloads directory, type:*
+      ```
+      cd ~/Downloads
+      ```
 
 1. Execute **s1tbx-rtc.sh** with the granule name and desired options
    ```
