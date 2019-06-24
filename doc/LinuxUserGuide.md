@@ -15,15 +15,48 @@ Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-lo
 
 ## System Requirements
 
-* Ubuntu or CentOS Linux
+* Operating System
+    - macOS 10.11 or later 
+    - Ubuntu 18.04 or later
+    - CentOS 7 or later
 * 64-bit installation
-* Kernel at 3.10 or newer
 * 16 GB of RAM
 * 20 GB of available hard disk space
 
 ## Installation
 
-### Ubuntu 18.04
+<details><summary>macOS</summary>
+
+1. Download the [Docker for Mac](https://download.docker.com/mac/stable/Docker.dmg) installer (~500 MB).
+
+1. Double-click Docker.dmg to open the installer, then drag Moby the whale to the Applications folder.
+
+   <p align="center"><img src="images/drag_and_drop.png" width="75%"></p>
+
+1. Double-click Docker.app in the Applications folder to start Docker, then follow any installation prompts.  When complete, "Docker Desktop is now up and running!" should be displayed.
+
+   **Note:** A Docker ID is not required.
+
+   <p align="center"><img src="images/applications_folder.png" width="75%"></p>
+   
+   <p align="center"><img src="images/docker_is_running.png" width="40%"></p>
+
+1. Click the Docker icon in the top status bar and select "Preferences".
+
+   <p align="center"><img src="images/preferences.png" width="30%"></p>
+
+   1. Select "Advanced".
+   1. Set "CPUs" to 4 or higher. More CPUs means faster processing, but may leave fewer resources for other programs during processing.
+   1. Set "Memory" to 16.0 GiB or higher.
+   1. Click "Apply & Restart" and wait for the green "Docker Engine is running" message to reappear.
+   
+   <p align="center"><img src="images/advanced_settings.png" width="75%"></p>
+
+1. Download [**s1tbx-rtc.sh**](https://asfdaac.s3.amazonaws.com/s1tbx-rtc.sh) to the directory where RTC products should be saved.
+
+</details>
+
+<details><summary>Ubuntu 18.04</summary>
 
 1. Install Docker using apt
    ```
@@ -48,8 +81,9 @@ Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-lo
    ```
    wget https://raw.githubusercontent.com/asfadmin/grfn-s1tbx-rtc/master/scripts/s1tbx-rtc.sh
    ```
+</details>
 
-### CentOS 7
+<details><summary>CentOS 7</summary>
 
 1. Install Docker
    ```
@@ -78,17 +112,33 @@ Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-lo
    ```
    wget https://raw.githubusercontent.com/asfadmin/grfn-s1tbx-rtc/master/scripts/s1tbx-rtc.sh
    ```
+</details>
 
 ## Usage
 
 1. Find the name of the GRD or SLC granule to process from [Vertex](https://vertex.daac.asf.alaska.edu/).
    
    *The examples below use S1B_IW_GRDH_1SDV_20190430T161529_20190430T161554_016038_01E295_771B*.
+
+1. **macOS only**
+
+   1. Open the Terminal app
+
+      <p align="center"><img src="images/terminal.png" width="75%"></p>
+   
+   1. In your Terminal window, navigate to the directory where **s1tbx-rtc.sh** is saved.
+   
+      *For example, if you saved the script to your Downloads directory, type:*
+      ```
+      cd ~/Downloads
+      ```
+
 1. Execute **s1tbx-rtc.sh** with the granule name and desired options
    ```
    sh s1tbx-rtc.sh --granule S1B_IW_GRDH_1SDV_20190430T161529_20190430T161554_016038_01E295_771B
    ```
    Processing can take up to several hours depending on the granule, internet connection, and computer resources
+
 1. Upon completion, RTC products will appear in the directory where **s1tbx-rtc.sh** was executed
    ```
    S1B_IW_GRDH_1SDV_20190430T161529_20190430T161554_016038_01E295_771B_VH_RTC.tif
