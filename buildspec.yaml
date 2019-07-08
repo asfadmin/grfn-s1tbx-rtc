@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+        docker: 18
+    commands:
+      - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2&
+      - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
+
+  build:
+    commands:
+      - sh tests/test_rtc.sh
+
+artifacts:
+  files:
+    - S1A_IW_GRDH_1SDV_20171209T043028_20171209T043053_019621_021551_C522_LS.tif 
+    - S1A_IW_GRDH_1SDV_20171209T043028_20171209T043053_019621_021551_C522_PIA.tif 
+    - S1A_IW_GRDH_1SDV_20171209T043028_20171209T043053_019621_021551_C522_VH_RTC.tif 
+    - S1A_IW_GRDH_1SDV_20171209T043028_20171209T043053_019621_021551_C522_VH_RTC.tif.xml 
+    - S1A_IW_GRDH_1SDV_20171209T043028_20171209T043053_019621_021551_C522_VV_RTC.tif 
+    - S1A_IW_GRDH_1SDV_20171209T043028_20171209T043053_019621_021551_C522_VV_RTC.tif.xml 
