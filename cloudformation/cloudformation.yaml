@@ -68,18 +68,3 @@ Resources:
                   "logs:PutLogEvents",
                   "logs:DescribeLogStreams"]
                 Resource: "arn:aws:logs:*:*:*"
-              - Effect: Allow
-                Action: [
-                  "ecr:BatchCheckLayerAvailability",
-                  "ecr:GetDownloadUrlForLayer",
-                  "ecr:GetRepositoryPolicy",
-                  "ecr:DescribeRepositories",
-                  "ecr:ListImages",
-                  "ecr:DescribeImages",
-                  "ecr:BatchGetImage",
-                  "ecr:CompleteLayerUpload",
-                  "ecr:GetAuthorizationToken",
-                  "ecr:InitiateLayerUpload",
-                  "ecr:PutImage",
-                  "ecr:UploadLayerPart"]
-                Resource: "*"
