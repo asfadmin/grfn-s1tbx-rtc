@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CodeBuild Docker Project Sample
+
+Parameters:
+  GitHubRepo:
+    Type: String
+
+  cmrusername:
+    Type: String
+
+  cmrpassword:
+    Type: String
+
+Resources:
+  CodeBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub ${AWS::StackName}-project
+      Source:
+        Type: GITHUB
+        Location: !Ref GitHubRepo
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PULL_REQUEST_CREATED,PULL_REQUEST_UPDATED
+            - Type: BASE_REF
+              Pattern: master
+              ExcludeMatchedPattern: false
+      Environment:
+        Type: LINUX_CONTAINER
+        Image: aws/codebuild/docker:17.09.0
+        ComputeType: BUILD_GENERAL1_LARGE
+        EnvironmentVariables:
+        - Name: AWS_ACCOUNT_ID
+          Value: !Ref AWS::AccountId
+        - Name: IMAGE_REPO_PREFIX
+          Value: codebuild/test
+        - Name: username
+          Value: !Ref cmrusername
+        - Name: pass
+          Value: !Ref cmrpassword
+      ServiceRole: !GetAtt [ IamRoleForCodeBuild, Arn ]
+  IamRoleForCodeBuild:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: grfn-rtc-test
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codebuild.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: policy-for-codebuild
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action: [
+                  "logs:CreateLogGroup",
+                  "logs:CreateLogStream",
+                  "logs:PutLogEvents",
+                  "logs:DescribeLogStreams"]
+                Resource: "arn:aws:logs:*:*:*"
