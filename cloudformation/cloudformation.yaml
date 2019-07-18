@@ -4,7 +4,6 @@ Description: CodeBuild Docker Project Sample
 Parameters:
   GitHubRepo:
     Type: String
-    Default: https://github.com/idixon/grfn-s1tbx-rtc.git
 
   cmrusername:
     Type: String
