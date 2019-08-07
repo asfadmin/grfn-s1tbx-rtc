@@ -271,7 +271,7 @@ if __name__ == "__main__":
 
     metadata = get_metadata(args.granule)
     if metadata is None:
-        print(f"\nERROR: Either {args.granule} does exist or it is not a GRD/SLC product.")
+        print(f"\nERROR: Either {args.granule} does not exist or it is not a GRD/SLC product.")
         exit(1)
 
     if metadata["bounding_box"]["lon_min"] < -170 and metadata["bounding_box"]["lon_max"] > 170:
