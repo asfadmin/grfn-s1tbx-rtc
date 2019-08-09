@@ -48,7 +48,7 @@ Distortions in Synthetic Aperture Radar (SAR) imagery are induced by the side-lo
    1. Select "Advanced".
    1. Set "CPUs" to 4 or higher. More CPUs means faster processing, but may leave fewer resources for other programs during processing.
    1. Set "Memory" to 16.0 GiB or higher.
-   1. Click "Apply & Restart" and wait for the green "Docker Engine is running" message to reappear.
+   1. Click "Apply & Restart" and wait for the green "Docker Desktop is running" message to reappear.
    
    <p align="center"><img src="images/advanced_settings.png" width="75%"></p>
 
